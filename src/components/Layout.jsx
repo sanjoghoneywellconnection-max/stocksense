@@ -41,7 +41,7 @@ export default function Layout({ children }) {
           <div className="w-9 h-9 bg-pink rounded-xl flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold">S</span>
           </div>
-          <span className="text-cream font-bold text-lg">StockSense</span>
+          <span className="text-cream font-bold text-lg">InventSight</span>
           <button
             onClick={() => setSidebarOpen(false)}
             className="ml-auto lg:hidden text-cream opacity-60 hover:opacity-100"

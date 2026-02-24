@@ -61,7 +61,7 @@ export default function Login() {
             <div className="w-10 h-10 bg-pink rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">S</span>
             </div>
-            <span className="text-cream font-bold text-xl">StockSense</span>
+            <span className="text-cream font-bold text-xl">InventSight</span>
           </div>
         </div>
 
@@ -108,7 +108,7 @@ export default function Login() {
             <div className="w-10 h-10 bg-pink rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">S</span>
             </div>
-            <span className="text-navy font-bold text-xl">StockSense</span>
+            <span className="text-navy font-bold text-xl">InventSight</span>
           </div>
 
           <h2 className="text-2xl font-bold text-navy mb-1">
@@ -116,7 +116,7 @@ export default function Login() {
           </h2>
           <p className="text-sm mb-8" style={{color: '#7880a4'}}>
             {mode === 'login'
-              ? 'Log in to your StockSense dashboard'
+              ? 'Log in to your InventSight dashboard'
               : 'Start your 14-day free trial. No credit card required.'}
           </p>
 
@@ -131,7 +131,7 @@ export default function Login() {
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Sanjog Kumar"
+                  placeholder="Sanjog Prasad"
                   required
                   className="w-full px-4 py-3 rounded-xl border text-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink focus:border-transparent transition-all"
                   style={{borderColor: '#e8e5f0', background: '#fefefd'}}
