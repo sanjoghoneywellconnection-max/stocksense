@@ -17,14 +17,18 @@ export function useOrg() {
           .select('org_id, role, organizations(*)')
           .eq('user_id', user.id)
           .eq('is_active', true)
-          .single()
+          .maybeSingle()
 
-        if (error || !data) {
+        if (error) {
+          console.error('useOrg error:', error)
+          setOrg(null)
+        } else if (!data) {
           setOrg(null)
         } else {
           setOrg({ ...data.organizations, role: data.role })
         }
       } catch (err) {
+        console.error('useOrg catch:', err)
         setError(err)
       } finally {
         setLoading(false)
