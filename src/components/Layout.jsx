@@ -14,7 +14,7 @@ const navItems = [
   { to: '/trends', icon: TrendingUp, label: 'Inventory Trends' },
   { to: '/warehouses-map', icon: Warehouse, label: 'Warehouse Map' },
   { to: '/sales', icon: ShoppingCart, label: 'Daily Sales Entry' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/settings', icon: Settings, label: 'Master Data' },
 ]
 
 export default function Layout({ children }) {
