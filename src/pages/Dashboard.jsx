@@ -368,7 +368,7 @@ export default function Dashboard() {
               { label: '+ Enter Today\'s Sales', to: '/sales', color: '#d63683' },
               { label: '→ SKU Explorer', to: '/skus', color: '#1e2b71' },
               { label: '→ Reorder Planner', to: '/reorder', color: '#dc2626' },
-              { label: '→ BCG Matrix', to: '/bcg', color: '#0f9b58' },
+              { label: '→ Portfolio Mix', to: '/bcg', color: '#0f9b58' },
               { label: '⚙ Master Data', to: '/settings', color: '#7880a4' },
             ].map(({ label, to, color }) => (
               <button key={to} onClick={() => navigate(to)}
