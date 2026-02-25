@@ -330,7 +330,7 @@ export default function Dashboard() {
           {/* BCG Summary */}
           <div className="bg-white rounded-2xl border p-5" style={{ borderColor: '#e8e5f0' }}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-navy">BCG Portfolio Mix</h2>
+              <h2 className="font-semibold text-navy">Portfolio Mix</h2>
               <button onClick={() => navigate('/bcg')}
                 className="text-xs font-medium" style={{ color: '#d63683' }}>
                 Full matrix →
