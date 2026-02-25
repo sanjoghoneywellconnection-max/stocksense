@@ -9,6 +9,7 @@ import SalesEntry from './pages/SalesEntry'
 import ComingSoon from './pages/placeholders/ComingSoon'
 import SkuExplorer from './pages/SkuExplorer'
 import ReorderPlanner from './pages/ReorderPlanner'
+import PortfolioAnalysis from './pages/PortfolioAnalysis'
 
 function Spinner() {
   return (
@@ -49,7 +50,7 @@ function AppRoutes() {
       <Route path="/sales" element={<OrgRoute><SalesEntry /></OrgRoute>} />
       <Route path="/skus" element={<OrgRoute><SkuExplorer /></OrgRoute>} />
       <Route path="/reorder" element={<OrgRoute><ReorderPlanner /></OrgRoute>} />
-      <Route path="/bcg" element={<OrgRoute><ComingSoon title="BCG Matrix" /></OrgRoute>} />
+      <Route path="/bcg" element={<OrgRoute><PortfolioAnalysis /></OrgRoute>} />
       <Route path="/trends" element={<OrgRoute><ComingSoon title="Inventory Trends" /></OrgRoute>} />
       <Route path="/warehouses-map" element={<OrgRoute><ComingSoon title="Warehouse Map" /></OrgRoute>} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
