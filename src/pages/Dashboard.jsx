@@ -120,7 +120,8 @@ export default function Dashboard() {
     setTodaySales(sumUp(todayRes.data))
     setYesterdaySales(sumUp(yestRes.data))
   }
-
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   const totalSkus = skuHealth.green + skuHealth.amber + skuHealth.red + skuHealth.black
   const urgentCount = skuHealth.red + skuHealth.black
   const gmvChange = yesterdaySales.gmv > 0
@@ -154,8 +155,9 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-navy">
-              Good morning, {org?.name} 👋
+              {greeting}, {org?.contact_email?.split('@')[0]} 👋
             </h1>
+            <p className="text-sm" style={{ color: '#7880a4' }}>{org?.name}</p>
             <p className="text-sm mt-0.5" style={{ color: '#7880a4' }}>
               {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
@@ -197,7 +199,7 @@ export default function Dashboard() {
         )}
 
         {/* Sales comparison row */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white rounded-2xl border p-5" style={{ borderColor: '#e8e5f0' }}>
             <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{ color: '#7880a4' }}>
               Today's Sales
@@ -244,7 +246,7 @@ export default function Dashboard() {
         {/* DOC Health Grid */}
         <div>
           <h2 className="font-semibold text-navy mb-3">Portfolio Stock Health</h2>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {Object.entries(docStatusConfig).map(([status, config]) => (
               <div key={status}
                 className="rounded-2xl border p-5 transition-all hover:shadow-sm cursor-pointer"
@@ -270,7 +272,7 @@ export default function Dashboard() {
         </div>
 
         {/* Bottom row — Alerts + BCG */}
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
           {/* Top Alerts */}
           <div className="bg-white rounded-2xl border p-5" style={{ borderColor: '#e8e5f0' }}>

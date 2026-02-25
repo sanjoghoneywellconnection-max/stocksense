@@ -36,7 +36,7 @@ export default function Settings() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 p-1 rounded-xl mb-6 w-fit" style={{background: '#f0edf8'}}>
+        <div className="flex gap-1 p-1 rounded-xl mb-6 overflow-x-auto" style={{background: '#f0edf8'}}>
           {tabs.map(tab => (
             <button
               key={tab.id}
