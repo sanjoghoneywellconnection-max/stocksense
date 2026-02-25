@@ -10,7 +10,7 @@ const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/skus', icon: Package, label: 'SKU Explorer' },
   { to: '/reorder', icon: AlertTriangle, label: 'Reorder Planner' },
-  { to: '/bcg', icon: BarChart3, label: 'BCG Matrix' },
+  { to: '/bcg', icon: BarChart3, label: 'Portfolio Analysis' },
   { to: '/trends', icon: TrendingUp, label: 'Inventory Trends' },
   { to: '/warehouses-map', icon: Warehouse, label: 'Warehouse Map' },
   { to: '/sales', icon: ShoppingCart, label: 'Daily Sales Entry' },
