@@ -1,3 +1,4 @@
+import SubscriptionBadge from './SubscriptionBadge'
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
@@ -76,6 +77,7 @@ export default function Layout({ children }) {
 
         {/* Logout */}
         <div className="px-3 py-4 border-t border-white border-opacity-10">
+          <SubscriptionBadge />
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all hover:bg-white hover:bg-opacity-10"

@@ -1,3 +1,5 @@
+import Subscribe from './pages/Subscribe'
+import PaywallBlur from './components/PaywallBlur'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { useOrg } from './hooks/useOrg'
@@ -48,13 +50,14 @@ function AppRoutes() {
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
       <Route path="/dashboard" element={<OrgRoute><Dashboard /></OrgRoute>} />
+      <Route path="/subscribe" element={<OrgRoute><Subscribe /></OrgRoute>} />
       <Route path="/settings" element={<OrgRoute><Settings /></OrgRoute>} />
       <Route path="/sales" element={<OrgRoute><SalesEntry /></OrgRoute>} />
-      <Route path="/skus" element={<OrgRoute><SkuExplorer /></OrgRoute>} />
-      <Route path="/reorder" element={<OrgRoute><ReorderPlanner /></OrgRoute>} />
-      <Route path="/bcg" element={<OrgRoute><PortfolioAnalysis /></OrgRoute>} />
-      <Route path="/trends" element={<OrgRoute><InventoryTrends /></OrgRoute>} />
-      <Route path="/warehouses-map" element={<OrgRoute><WarehouseMap /></OrgRoute>} />
+      <Route path="/skus" element={<OrgRoute><PaywallBlur><SkuExplorer /></PaywallBlur></OrgRoute>} />
+      <Route path="/reorder" element={<OrgRoute><PaywallBlur><ReorderPlanner /></PaywallBlur></OrgRoute>} />
+      <Route path="/bcg" element={<OrgRoute><PaywallBlur><PortfolioAnalysis /></PaywallBlur></OrgRoute>} />
+      <Route path="/trends" element={<OrgRoute><PaywallBlur><InventoryTrends /></PaywallBlur></OrgRoute>} />
+      <Route path="/warehouses-map" element={<OrgRoute><PaywallBlur><WarehouseMap /></PaywallBlur></OrgRoute>} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   )
