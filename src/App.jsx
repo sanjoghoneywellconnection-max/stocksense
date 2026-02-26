@@ -1,3 +1,4 @@
+import Landing from './pages/Landing'
 import Subscribe from './pages/Subscribe'
 import PaywallBlur from './components/PaywallBlur'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
@@ -47,6 +48,7 @@ function OrgRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
       <Route path="/dashboard" element={<OrgRoute><Dashboard /></OrgRoute>} />
