@@ -10,11 +10,11 @@ const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/skus', icon: Package, label: 'SKU Explorer' },
   { to: '/reorder', icon: AlertTriangle, label: 'Reorder Planner' },
-  { to: '/bcg', icon: BarChart3, label: 'BCG Matrix' },
+  { to: '/bcg', icon: BarChart3, label: 'Portfolio Analysis' },
   { to: '/trends', icon: TrendingUp, label: 'Inventory Trends' },
   { to: '/warehouses-map', icon: Warehouse, label: 'Warehouse Map' },
   { to: '/sales', icon: ShoppingCart, label: 'Daily Sales Entry' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/settings', icon: Settings, label: 'Master Data' },
 ]
 
 export default function Layout({ children }) {
@@ -79,7 +79,7 @@ export default function Layout({ children }) {
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all hover:bg-white hover:bg-opacity-10"
-            style={{color: 'rgba(254,254,253,0.65)'}}
+            style={{ color: 'rgba(254,254,253,0.65)' }}
           >
             <LogOut size={18} />
             Log Out
@@ -98,15 +98,21 @@ export default function Layout({ children }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="bg-cream border-b px-6 py-4 flex items-center gap-4 flex-shrink-0" style={{borderColor: '#e8e5f0'}}>
+        <header className="bg-cream border-b px-4 py-3 flex items-center gap-3 flex-shrink-0" style={{ borderColor: '#e8e5f0' }}>
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-navy"
+            className="lg:hidden text-navy flex-shrink-0"
           >
             <Menu size={22} />
           </button>
+          <div className="flex items-center gap-2 lg:hidden">
+            <div className="w-7 h-7 bg-pink rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">I</span>
+            </div>
+            <span className="font-bold text-navy text-sm">InventSight</span>
+          </div>
           <div className="flex-1" />
-          <div className="w-8 h-8 bg-pink rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-pink rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-white text-sm font-bold">S</span>
           </div>
         </header>

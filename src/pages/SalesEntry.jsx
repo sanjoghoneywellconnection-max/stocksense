@@ -156,7 +156,7 @@ export default function SalesEntry() {
 
         {/* Controls */}
         <div className="bg-white rounded-2xl border p-5 mb-5" style={{borderColor: '#e8e5f0'}}>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-navy mb-1.5">Date</label>
               <input
