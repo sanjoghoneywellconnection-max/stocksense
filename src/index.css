@@ -15,3 +15,14 @@ body {
   background-color: #fefefd;
   color: #1e2b71;
 }
+
+/* Hide scrollbars but keep scrolling functional */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
