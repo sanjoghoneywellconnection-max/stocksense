@@ -4,7 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import {
   LayoutDashboard, Package, Warehouse, ShoppingCart,
-  TrendingUp, TrendingDown, AlertTriangle, BarChart3, PieChart, Settings, LogOut, Menu, X
+  TrendingUp, TrendingDown, AlertTriangle, BarChart3, PieChart, Settings, LogOut, Menu, X, User
 } from 'lucide-react'
 
 const navItems = [
