@@ -15,6 +15,8 @@ import ReorderPlanner from './pages/ReorderPlanner'
 import PortfolioAnalysis from './pages/PortfolioAnalysis'
 import InventoryTrends from './pages/InventoryTrends'
 import WarehouseMap from './pages/WarehouseMap'
+import ReturnsAnalysis from './pages/ReturnsAnalysis'
+import CategoryContribution from './pages/CategoryContribution'
 
 function Spinner() {
   return (
@@ -59,6 +61,8 @@ function AppRoutes() {
       <Route path="/reorder" element={<OrgRoute><PaywallBlur><ReorderPlanner /></PaywallBlur></OrgRoute>} />
       <Route path="/bcg" element={<OrgRoute><PaywallBlur><PortfolioAnalysis /></PaywallBlur></OrgRoute>} />
       <Route path="/trends" element={<OrgRoute><PaywallBlur><InventoryTrends /></PaywallBlur></OrgRoute>} />
+      <Route path="/returns" element={<OrgRoute><PaywallBlur><ReturnsAnalysis /></PaywallBlur></OrgRoute>} />
+      <Route path="/categories" element={<OrgRoute><PaywallBlur><CategoryContribution /></PaywallBlur></OrgRoute>} />
       <Route path="/warehouses-map" element={<OrgRoute><PaywallBlur><WarehouseMap /></PaywallBlur></OrgRoute>} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
