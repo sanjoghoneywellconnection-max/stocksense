@@ -1,226 +1,425 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, User, Building2 } from 'lucide-react'
 
 export default function Login() {
-  const [mode, setMode] = useState('login')
+  const navigate = useNavigate()
+  const [mode, setMode] = useState('login') // 'login' | 'signup' | 'forgot'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [orgName, setOrgName] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState({ text: '', type: '' })
+  const [error, setError] = useState('')
+  const [forgotSent, setForgotSent] = useState(false)
+  const [signupSuccess, setSignupSuccess] = useState(false)
+
+  function resetForm() {
+    setEmail('')
+    setPassword('')
+    setConfirmPassword('')
+    setFullName('')
+    setOrgName('')
+    setError('')
+    setShowPassword(false)
+  }
 
   async function handleLogin(e) {
     e.preventDefault()
     setLoading(true)
-    setMessage({ text: '', type: '' })
+    setError('')
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setMessage({ text: error.message, type: 'error' })
-    } else {
-      setMessage({ text: 'Logged in successfully!', type: 'success' })
+      setError('Incorrect email or password. Please try again.')
+      setLoading(false)
+      return
     }
-    setLoading(false)
+
+    navigate('/dashboard')
   }
 
   async function handleSignup(e) {
     e.preventDefault()
-    setLoading(true)
-    setMessage({ text: '', type: '' })
+    setError('')
 
-    const { error } = await supabase.auth.signUp({
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
+    if (!orgName.trim()) {
+      setError('Please enter your business name.')
+      return
+    }
+
+    setLoading(true)
+
+    // Create auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName }
+        data: { full_name: fullName.trim() }
       }
     })
 
-    if (error) {
-      setMessage({ text: error.message, type: 'error' })
-    } else {
-      setMessage({
-        text: 'Account created! Please check your email to confirm your account.',
-        type: 'success'
-      })
+    if (authError) {
+      setError(authError.message)
+      setLoading(false)
+      return
     }
+
+    const userId = authData.user?.id
+    if (!userId) {
+      setError('Signup failed. Please try again.')
+      setLoading(false)
+      return
+    }
+
+    // Create organization
+    const { data: orgData, error: orgError } = await supabase
+      .from('organizations')
+      .insert({
+        name: orgName.trim(),
+        contact_email: email,
+        created_by: userId,
+      })
+      .select()
+      .single()
+
+    if (orgError) {
+      setError('Could not create your account. Please try again.')
+      setLoading(false)
+      return
+    }
+
+    // Create org member
+    await supabase.from('org_members').insert({
+      org_id: orgData.id,
+      user_id: userId,
+      role: 'owner',
+    })
+
+    setSignupSuccess(true)
+    setLoading(false)
+  }
+
+  async function handleForgotPassword(e) {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+
+    if (error) {
+      setError('Could not send reset email. Please check the email address.')
+      setLoading(false)
+      return
+    }
+
+    setForgotSent(true)
     setLoading(false)
   }
 
   return (
-    <div className="min-h-screen bg-cream flex">
+    <div className="min-h-screen flex items-center justify-center p-4"
+      style={{background: 'linear-gradient(135deg, #1e2b71 0%, #2d3e9e 100%)'}}>
 
-      {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-navy flex-col justify-between p-12">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-pink rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
+      <div className="w-full max-w-md">
+
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{background: '#d63683'}}>
+              <span style={{color: 'white', fontWeight: '800', fontSize: '18px'}}>I</span>
             </div>
-            <span className="text-cream font-bold text-xl">InventSight</span>
+            <span style={{color: 'white', fontWeight: '700', fontSize: '22px'}}>InventSight</span>
           </div>
+          <p style={{color: 'rgba(255,255,255,0.5)', fontSize: '14px'}}>
+            Inventory Intelligence for Indian Brands
+          </p>
         </div>
 
-        <div>
-          <h1 className="text-cream text-4xl font-bold leading-tight mb-6">
-            Inventory Intelligence<br />
-            <span className="text-peach">for Indian Brands</span>
-          </h1>
-          <p className="text-blue-200 text-lg leading-relaxed mb-10" style={{color: 'rgba(254,254,253,0.6)'}}>
-            Know exactly when your stock will run out — before it does. Stop losing lakhs to stockouts and dead inventory.
-          </p>
+        <div className="bg-white rounded-2xl p-8 shadow-2xl">
 
-          <div className="space-y-4">
-            {[
-              { stat: 'DRR', desc: 'Daily Run Rate at child ASIN level' },
-              { stat: 'DOC', desc: 'Days of Cover — colour coded urgency' },
-              { stat: 'BCG', desc: 'Star, Cash Cow, Dog, Question Mark' },
-            ].map((item) => (
-              <div key={item.stat} className="flex items-center gap-4">
-                <div className="w-14 h-8 bg-pink rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-bold">{item.stat}</span>
+          {/* LOGIN */}
+          {mode === 'login' && (
+            <>
+              <h2 className="text-xl font-bold text-navy mb-1">Welcome back</h2>
+              <p className="text-sm mb-6" style={{color: '#7880a4'}}>
+                Sign in to your InventSight account
+              </p>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-navy mb-1.5">Email address</label>
+                  <div className="relative">
+                    <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                      style={{color: '#b0b4c8'}} />
+                    <input type="email" value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="you@company.com" required
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm text-navy focus:outline-none"
+                      style={{borderColor: '#e8e5f0'}} />
+                  </div>
                 </div>
-                <span style={{color: 'rgba(254,254,253,0.7)'}} className="text-sm">{item.desc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        <div>
-          <div className="inline-block bg-peach bg-opacity-20 rounded-2xl px-5 py-3" style={{background: 'rgba(255,199,163,0.15)', border: '1px solid rgba(255,199,163,0.3)'}}>
-            <p className="text-peach text-sm font-medium">
-              "Save even 1 lakh — pay 5K a month. Simple math."
-            </p>
-          </div>
+                <div>
+                  <label className="block text-xs font-semibold text-navy mb-1.5">Password</label>
+                  <div className="relative">
+                    <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                      style={{color: '#b0b4c8'}} />
+                    <input type={showPassword ? 'text' : 'password'}
+                      value={password} onChange={e => setPassword(e.target.value)}
+                      placeholder="Enter your password" required
+                      className="w-full pl-9 pr-10 py-3 rounded-xl border text-sm text-navy focus:outline-none"
+                      style={{borderColor: '#e8e5f0'}} />
+                    <button type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {showPassword
+                        ? <EyeOff size={15} style={{color: '#b0b4c8'}} />
+                        : <Eye size={15} style={{color: '#b0b4c8'}} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-right">
+                  <button type="button"
+                    onClick={() => { setMode('forgot'); setError('') }}
+                    className="text-xs font-medium" style={{color: '#d63683'}}>
+                    Forgot password?
+                  </button>
+                </div>
+
+                {error && (
+                  <div className="px-4 py-3 rounded-xl text-sm font-medium"
+                    style={{background: '#fef2f2', color: '#dc2626'}}>{error}</div>
+                )}
+
+                <button type="submit" disabled={loading}
+                  className="w-full py-3 rounded-xl font-semibold text-white text-sm"
+                  style={{background: loading ? '#9ca3af' : '#d63683'}}>
+                  {loading ? 'Signing in...' : 'Sign in →'}
+                </button>
+              </form>
+
+              <div className="mt-6 pt-6 border-t text-center" style={{borderColor: '#f0edf8'}}>
+                <p className="text-sm" style={{color: '#7880a4'}}>
+                  New to InventSight?{' '}
+                  <button onClick={() => { setMode('signup'); resetForm() }}
+                    className="font-semibold" style={{color: '#d63683'}}>
+                    Start free 14-day trial
+                  </button>
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* SIGNUP */}
+          {mode === 'signup' && !signupSuccess && (
+            <>
+              <button onClick={() => { setMode('login'); resetForm() }}
+                className="flex items-center gap-1.5 text-sm mb-5"
+                style={{color: '#7880a4'}}>
+                <ArrowLeft size={14} /> Back to login
+              </button>
+
+              <h2 className="text-xl font-bold text-navy mb-1">Start your free trial</h2>
+              <p className="text-sm mb-6" style={{color: '#7880a4'}}>
+                14 days free · No credit card required · Cancel anytime
+              </p>
+
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-navy mb-1.5">Your Name</label>
+                  <div className="relative">
+                    <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                      style={{color: '#b0b4c8'}} />
+                    <input type="text" value={fullName}
+                      onChange={e => setFullName(e.target.value)}
+                      placeholder="e.g. Sanjog" required
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm text-navy focus:outline-none"
+                      style={{borderColor: '#e8e5f0'}} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-navy mb-1.5">Business Name</label>
+                  <div className="relative">
+                    <Building2 size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                      style={{color: '#b0b4c8'}} />
+                    <input type="text" value={orgName}
+                      onChange={e => setOrgName(e.target.value)}
+                      placeholder="e.g. Wozoyo Brands" required
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm text-navy focus:outline-none"
+                      style={{borderColor: '#e8e5f0'}} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-navy mb-1.5">Email Address</label>
+                  <div className="relative">
+                    <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                      style={{color: '#b0b4c8'}} />
+                    <input type="email" value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="you@company.com" required
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm text-navy focus:outline-none"
+                      style={{borderColor: '#e8e5f0'}} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-navy mb-1.5">Password</label>
+                  <div className="relative">
+                    <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                      style={{color: '#b0b4c8'}} />
+                    <input type={showPassword ? 'text' : 'password'}
+                      value={password} onChange={e => setPassword(e.target.value)}
+                      placeholder="Minimum 8 characters" required
+                      className="w-full pl-9 pr-10 py-3 rounded-xl border text-sm text-navy focus:outline-none"
+                      style={{borderColor: '#e8e5f0'}} />
+                    <button type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {showPassword
+                        ? <EyeOff size={15} style={{color: '#b0b4c8'}} />
+                        : <Eye size={15} style={{color: '#b0b4c8'}} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-navy mb-1.5">Confirm Password</label>
+                  <div className="relative">
+                    <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                      style={{color: '#b0b4c8'}} />
+                    <input type="password"
+                      value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="Repeat your password" required
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm text-navy focus:outline-none"
+                      style={{borderColor: '#e8e5f0'}} />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="px-4 py-3 rounded-xl text-sm font-medium"
+                    style={{background: '#fef2f2', color: '#dc2626'}}>{error}</div>
+                )}
+
+                <button type="submit" disabled={loading}
+                  className="w-full py-3 rounded-xl font-semibold text-white text-sm"
+                  style={{background: loading ? '#9ca3af' : '#d63683'}}>
+                  {loading ? 'Creating account...' : 'Start free trial →'}
+                </button>
+
+                <p className="text-xs text-center" style={{color: '#b0b4c8'}}>
+                  By signing up you agree to our terms of service
+                </p>
+              </form>
+            </>
+          )}
+
+          {/* SIGNUP SUCCESS */}
+          {mode === 'signup' && signupSuccess && (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{background: '#f0fdf4'}}>
+                <span className="text-3xl">🎉</span>
+              </div>
+              <h2 className="text-xl font-bold text-navy mb-2">Account created!</h2>
+              <p className="text-sm mb-2" style={{color: '#7880a4'}}>
+                Welcome to InventSight. Your 14-day free trial has started.
+              </p>
+              <p className="text-sm mb-6" style={{color: '#7880a4'}}>
+                Check your email to verify your account, then sign in.
+              </p>
+              <button onClick={() => { setMode('login'); resetForm() }}
+                className="w-full py-3 rounded-xl font-semibold text-white text-sm"
+                style={{background: '#d63683'}}>
+                Go to login →
+              </button>
+            </div>
+          )}
+
+          {/* FORGOT PASSWORD */}
+          {mode === 'forgot' && !forgotSent && (
+            <>
+              <button onClick={() => { setMode('login'); setError('') }}
+                className="flex items-center gap-1.5 text-sm mb-5"
+                style={{color: '#7880a4'}}>
+                <ArrowLeft size={14} /> Back to login
+              </button>
+
+              <h2 className="text-xl font-bold text-navy mb-1">Reset your password</h2>
+              <p className="text-sm mb-6" style={{color: '#7880a4'}}>
+                Enter your email and we will send you a reset link
+              </p>
+
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-navy mb-1.5">Email address</label>
+                  <div className="relative">
+                    <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
+                      style={{color: '#b0b4c8'}} />
+                    <input type="email" value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="you@company.com" required
+                      className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm text-navy focus:outline-none"
+                      style={{borderColor: '#e8e5f0'}} />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="px-4 py-3 rounded-xl text-sm font-medium"
+                    style={{background: '#fef2f2', color: '#dc2626'}}>{error}</div>
+                )}
+
+                <button type="submit" disabled={loading}
+                  className="w-full py-3 rounded-xl font-semibold text-white text-sm"
+                  style={{background: loading ? '#9ca3af' : '#d63683'}}>
+                  {loading ? 'Sending...' : 'Send reset link →'}
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* FORGOT SUCCESS */}
+          {mode === 'forgot' && forgotSent && (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{background: '#f0fdf4'}}>
+                <span className="text-3xl">📧</span>
+              </div>
+              <h2 className="text-xl font-bold text-navy mb-2">Check your email</h2>
+              <p className="text-sm mb-6" style={{color: '#7880a4'}}>
+                We sent a password reset link to <strong>{email}</strong>.
+                Click the link to set a new password.
+              </p>
+              <p className="text-xs mb-4" style={{color: '#b0b4c8'}}>
+                Didn't get it? Check your spam folder.
+              </p>
+              <button onClick={() => { setMode('login'); setForgotSent(false); setEmail('') }}
+                className="text-sm font-medium" style={{color: '#d63683'}}>
+                ← Back to login
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
-
-      {/* Right Panel — Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-
-          {/* Mobile logo */}
-          <div className="flex items-center gap-3 mb-8 lg:hidden">
-            <div className="w-10 h-10 bg-pink rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <span className="text-navy font-bold text-xl">InventSight</span>
-          </div>
-
-          <h2 className="text-2xl font-bold text-navy mb-1">
-            {mode === 'login' ? 'Welcome back' : 'Create your account'}
-          </h2>
-          <p className="text-sm mb-8" style={{color: '#7880a4'}}>
-            {mode === 'login'
-              ? 'Log in to your InventSight dashboard'
-              : 'Start your 14-day free trial. No credit card required.'}
-          </p>
-
-          <form onSubmit={mode === 'login' ? handleLogin : handleSignup} className="space-y-4">
-
-            {mode === 'signup' && (
-              <div>
-                <label className="block text-sm font-medium text-navy mb-1.5">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Sanjog Prasad"
-                  required
-                  className="w-full px-4 py-3 rounded-xl border text-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink focus:border-transparent transition-all"
-                  style={{borderColor: '#e8e5f0', background: '#fefefd'}}
-                />
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-navy mb-1.5">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@brand.com"
-                required
-                className="w-full px-4 py-3 rounded-xl border text-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink focus:border-transparent transition-all"
-                style={{borderColor: '#e8e5f0', background: '#fefefd'}}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-navy mb-1.5">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimum 6 characters"
-                required
-                minLength={6}
-                className="w-full px-4 py-3 rounded-xl border text-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink focus:border-transparent transition-all"
-                style={{borderColor: '#e8e5f0', background: '#fefefd'}}
-              />
-            </div>
-
-            {message.text && (
-              <div
-                className="px-4 py-3 rounded-xl text-sm font-medium"
-                style={{
-                  background: message.type === 'error' ? '#fef2f2' : '#f0fdf4',
-                  color: message.type === 'error' ? '#dc2626' : '#16a34a',
-                  border: `1px solid ${message.type === 'error' ? '#fecaca' : '#bbf7d0'}`
-                }}
-              >
-                {message.text}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl font-semibold text-white transition-all duration-200 mt-2"
-              style={{
-                background: loading ? '#9ca3af' : '#d63683',
-                cursor: loading ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {loading
-                ? 'Please wait...'
-                : mode === 'login' ? 'Log In' : 'Create Account'}
-            </button>
-
-          </form>
-
-          <div className="mt-6 text-center">
-            <span className="text-sm" style={{color: '#7880a4'}}>
-              {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
-            </span>
-            <button
-              onClick={() => {
-                setMode(mode === 'login' ? 'signup' : 'login')
-                setMessage({ text: '', type: '' })
-              }}
-              className="text-sm font-semibold text-pink hover:underline"
-            >
-              {mode === 'login' ? 'Sign up free' : 'Log in'}
-            </button>
-          </div>
-
-          <p className="text-center text-xs mt-8" style={{color: '#b0b4c8'}}>
-            Rs. 4,999 / month after trial · Cancel anytime
-          </p>
-
-        </div>
-      </div>
-
     </div>
   )
 }

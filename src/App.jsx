@@ -17,6 +17,8 @@ import InventoryTrends from './pages/InventoryTrends'
 import WarehouseMap from './pages/WarehouseMap'
 import ReturnsAnalysis from './pages/ReturnsAnalysis'
 import CategoryContribution from './pages/CategoryContribution'
+import Profile from './pages/Profile'
+import ResetPassword from './pages/ResetPassword'
 
 function Spinner() {
   return (
@@ -65,6 +67,8 @@ function AppRoutes() {
       <Route path="/categories" element={<OrgRoute><PaywallBlur><CategoryContribution /></PaywallBlur></OrgRoute>} />
       <Route path="/warehouses-map" element={<OrgRoute><PaywallBlur><WarehouseMap /></PaywallBlur></OrgRoute>} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/profile" element={<OrgRoute><Profile /></OrgRoute>} />
     </Routes>
   )
 }

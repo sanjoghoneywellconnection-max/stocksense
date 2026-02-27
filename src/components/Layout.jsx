@@ -81,6 +81,13 @@ export default function Layout({ children }) {
         <div className="px-3 py-4 border-t border-white border-opacity-10">
           <SubscriptionBadge />
           <button
+            onClick={() => navigate('/profile')}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-white hover:bg-opacity-10 mb-1"
+            style={{ color: 'rgba(255,255,255,0.7)' }}>
+            <User size={18} />
+            My Profile
+          </button>
+          <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all hover:bg-white hover:bg-opacity-10"
             style={{ color: 'rgba(254,254,253,0.65)' }}
