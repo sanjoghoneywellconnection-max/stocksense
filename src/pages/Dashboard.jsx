@@ -4,9 +4,10 @@ import { useOrg } from '../hooks/useOrg'
 import { supabase } from '../supabaseClient'
 import {
   AlertTriangle, TrendingUp, TrendingDown,
-  Package, RefreshCw, ArrowRight
+  RefreshCw, ArrowRight
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import TrainingButton from '../components/TrainingButton'
 
 export default function Dashboard() {
   const { org } = useOrg()
@@ -20,9 +21,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
-  useEffect(() => {
-    if (org) loadDashboard()
-  }, [org])
+  useEffect(() => { if (org) loadDashboard() }, [org])
 
   async function loadDashboard() {
     setLoading(true)
@@ -45,10 +44,8 @@ export default function Dashboard() {
 
   async function fetchTotalSkus() {
     const { data } = await supabase
-      .from('skus')
-      .select('id')
-      .eq('org_id', org.id)
-      .eq('is_active', true)
+      .from('skus').select('id')
+      .eq('org_id', org.id).eq('is_active', true)
     setTotalSkuCount(data?.length || 0)
   }
 
@@ -58,16 +55,12 @@ export default function Dashboard() {
       .select('doc_status, sku_id, calculated_on')
       .eq('org_id', org.id)
       .order('calculated_on', { ascending: false })
-
     if (!data) return
-
     const seen = new Set()
     const unique = data.filter(m => {
       if (seen.has(m.sku_id)) return false
-      seen.add(m.sku_id)
-      return true
+      seen.add(m.sku_id); return true
     })
-
     const counts = { green: 0, amber: 0, red: 0, black: 0 }
     unique.forEach(m => { if (counts[m.doc_status] !== undefined) counts[m.doc_status]++ })
     setSkuHealth(counts)
@@ -79,16 +72,12 @@ export default function Dashboard() {
       .select('bcg_class, sku_id, calculated_on')
       .eq('org_id', org.id)
       .order('calculated_on', { ascending: false })
-
     if (!data) return
-
     const seen = new Set()
     const unique = data.filter(m => {
       if (seen.has(m.sku_id)) return false
-      seen.add(m.sku_id)
-      return true
+      seen.add(m.sku_id); return true
     })
-
     const counts = { star: 0, cash_cow: 0, question_mark: 0, dog: 0 }
     unique.forEach(m => { if (counts[m.bcg_class] !== undefined) counts[m.bcg_class]++ })
     setBcgCounts(counts)
@@ -104,16 +93,12 @@ export default function Dashboard() {
       .eq('org_id', org.id)
       .in('doc_status', ['red', 'black'])
       .order('calculated_on', { ascending: false })
-
     if (!data) { setTopAlerts([]); return }
-
     const seen = new Set()
     const unique = data.filter(m => {
       if (seen.has(m.sku_id)) return false
-      seen.add(m.sku_id)
-      return true
+      seen.add(m.sku_id); return true
     })
-
     unique.sort((a, b) => parseFloat(a.doc_days) - parseFloat(b.doc_days))
     setTopAlerts(unique.slice(0, 5))
   }
@@ -121,19 +106,16 @@ export default function Dashboard() {
   async function fetchSalesComparison() {
     const today = new Date().toISOString().split('T')[0]
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-
     const [todayRes, yestRes] = await Promise.all([
       supabase.from('daily_sales').select('units_sold, gmv')
         .eq('org_id', org.id).eq('sale_date', today),
       supabase.from('daily_sales').select('units_sold, gmv')
         .eq('org_id', org.id).eq('sale_date', yesterday),
     ])
-
     const sumUp = (rows) => ({
       units: rows?.reduce((s, r) => s + (r.units_sold || 0), 0) || 0,
       gmv: rows?.reduce((s, r) => s + (parseFloat(r.gmv) || 0), 0) || 0,
     })
-
     setTodaySales(sumUp(todayRes.data))
     setYesterdaySales(sumUp(yestRes.data))
   }
@@ -146,10 +128,10 @@ export default function Dashboard() {
     : null
 
   const docStatusConfig = {
-    green: { label: 'Healthy',   color: '#0f9b58', bg: '#f0fdf4', border: '#bbf7d0', desc: '30+ days cover' },
-    amber: { label: 'Plan Now',  color: '#d97706', bg: '#fffbeb', border: '#fde68a', desc: '15–30 days cover' },
-    red:   { label: 'Act Now',   color: '#dc2626', bg: '#fef2f2', border: '#fecaca', desc: 'Under 15 days' },
-    black: { label: 'Critical',  color: '#111827', bg: '#f9fafb', border: '#e5e7eb', desc: 'OOS or < lead time' },
+    green: { label: 'Healthy',  color: '#0f9b58', bg: '#f0fdf4', border: '#bbf7d0', desc: '30+ days cover' },
+    amber: { label: 'Plan Now', color: '#d97706', bg: '#fffbeb', border: '#fde68a', desc: '15–30 days cover' },
+    red:   { label: 'Act Now',  color: '#dc2626', bg: '#fef2f2', border: '#fecaca', desc: 'Under 15 days' },
+    black: { label: 'Critical', color: '#111827', bg: '#f9fafb', border: '#e5e7eb', desc: 'OOS or < lead time' },
   }
 
   if (loading) return (
@@ -169,7 +151,7 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-navy">
               {greeting}, {org?.contact_email?.split('@')[0]} 👋
@@ -178,20 +160,20 @@ export default function Dashboard() {
               {org?.name} · {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           </div>
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all hover:shadow-sm"
-            style={{borderColor: '#e8e5f0', color: '#7880a4', background: 'white'}}
-          >
-            <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
-            {refreshing ? 'Recalculating...' : 'Refresh Metrics'}
-          </button>
+          <div className="flex items-center gap-3">
+            <TrainingButton title="Dashboard Training" />
+            <button onClick={handleRefresh} disabled={refreshing}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all hover:shadow-sm"
+              style={{borderColor: '#e8e5f0', color: '#7880a4', background: 'white'}}>
+              <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
+              {refreshing ? 'Recalculating...' : 'Refresh Metrics'}
+            </button>
+          </div>
         </div>
 
         {/* Urgent banner */}
         {urgentCount > 0 && (
-          <div className="flex items-center justify-between px-5 py-4 rounded-2xl"
+          <div className="flex items-center justify-between px-5 py-4 rounded-2xl flex-wrap gap-3"
             style={{background: '#fef2f2', border: '1px solid #fecaca'}}>
             <div className="flex items-center gap-3">
               <AlertTriangle size={20} style={{color: '#dc2626'}} />
@@ -204,11 +186,9 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => navigate('/reorder')}
+            <button onClick={() => navigate('/reorder')}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
-              style={{background: '#dc2626'}}
-            >
+              style={{background: '#dc2626'}}>
               View Reorder Planner <ArrowRight size={14} />
             </button>
           </div>
@@ -226,8 +206,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-1 mt-2">
                 {parseFloat(gmvChange) >= 0
                   ? <TrendingUp size={14} style={{color: '#0f9b58'}} />
-                  : <TrendingDown size={14} style={{color: '#dc2626'}} />
-                }
+                  : <TrendingDown size={14} style={{color: '#dc2626'}} />}
                 <span className="text-xs font-medium"
                   style={{color: parseFloat(gmvChange) >= 0 ? '#0f9b58' : '#dc2626'}}>
                   {gmvChange > 0 ? '+' : ''}{gmvChange}% vs yesterday
@@ -267,21 +246,16 @@ export default function Dashboard() {
               <div key={status}
                 className="rounded-2xl border p-5 transition-all hover:shadow-sm cursor-pointer"
                 style={{background: config.bg, borderColor: config.border}}
-                onClick={() => navigate('/skus')}
-              >
+                onClick={() => navigate('/skus')}>
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-semibold uppercase tracking-wider"
-                    style={{color: config.color}}>
-                    {config.label}
-                  </span>
+                    style={{color: config.color}}>{config.label}</span>
                   <div className="w-2.5 h-2.5 rounded-full" style={{background: config.color}} />
                 </div>
                 <p className="text-4xl font-bold mb-1" style={{color: config.color}}>
                   {skuHealth[status]}
                 </p>
-                <p className="text-xs" style={{color: config.color, opacity: 0.7}}>
-                  {config.desc}
-                </p>
+                <p className="text-xs" style={{color: config.color, opacity: 0.7}}>{config.desc}</p>
               </div>
             ))}
           </div>

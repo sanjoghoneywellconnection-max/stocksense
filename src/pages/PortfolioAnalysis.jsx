@@ -3,6 +3,7 @@ import Layout from '../components/Layout'
 import { useOrg } from '../hooks/useOrg'
 import { supabase } from '../supabaseClient'
 import { RefreshCw, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import TrainingButton from '../components/TrainingButton'
 
 const CATEGORIES = {
   star: {
@@ -138,6 +139,7 @@ export default function PortfolioAnalysis() {
       <div className="max-w-6xl mx-auto space-y-5">
 
         {/* Header */}
+        <TrainingButton title="Portfolio Training" />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-navy">Portfolio Analysis</h1>

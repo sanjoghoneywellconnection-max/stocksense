@@ -3,6 +3,7 @@ import Layout from '../components/Layout'
 import { useOrg } from '../hooks/useOrg'
 import { supabase } from '../supabaseClient'
 import { Search, Filter, ChevronDown, ChevronUp, Package, RefreshCw } from 'lucide-react'
+import TrainingButton from '../components/TrainingButton'
 
 const DOC_CONFIG = {
   green:  { label: 'Healthy',   color: '#0f9b58', bg: '#f0fdf4', border: '#bbf7d0' },
@@ -165,6 +166,7 @@ export default function SkuExplorer() {
       <div className="max-w-7xl mx-auto space-y-5">
 
         {/* Header */}
+        <TrainingButton title="SKU Explorer Training" />
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-navy">SKU Explorer</h1>

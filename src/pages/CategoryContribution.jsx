@@ -7,6 +7,8 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell, Legend
 } from 'recharts'
+import TrainingButton from '../components/TrainingButton'
+
 
 const COLORS = ['#d63683', '#1e2b71', '#0f9b58', '#d97706', '#7c3aed', '#dc2626', '#0891b2', '#84cc16']
 
@@ -87,6 +89,7 @@ export default function CategoryContribution() {
       <div className="max-w-6xl mx-auto space-y-5">
 
         {/* Header */}
+        <TrainingButton title="Category Training" />
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-navy">Category Contribution</h1>

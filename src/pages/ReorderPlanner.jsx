@@ -6,6 +6,7 @@ import {
     AlertTriangle, CheckCircle, Clock, Package,
     RefreshCw, ShoppingCart, ChevronDown, ChevronUp, X
 } from 'lucide-react'
+import TrainingButton from '../components/TrainingButton'
 
 const DOC_CONFIG = {
     green: { label: 'Healthy', color: '#0f9b58', bg: '#f0fdf4', border: '#bbf7d0' },
@@ -168,6 +169,7 @@ export default function ReorderPlanner() {
             <div className="max-w-5xl mx-auto space-y-5">
 
                 {/* Header */}
+                <TrainingButton title="Reorder Planner Training" />
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-navy">Reorder Planner</h1>

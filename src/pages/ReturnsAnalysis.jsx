@@ -3,6 +3,8 @@ import Layout from '../components/Layout'
 import { useOrg } from '../hooks/useOrg'
 import { supabase } from '../supabaseClient'
 import { RefreshCw, ChevronDown, ChevronUp, Package } from 'lucide-react'
+import TrainingButton from '../components/TrainingButton'
+
 
 export default function ReturnsAnalysis() {
   const { org } = useOrg()
@@ -94,7 +96,7 @@ export default function ReturnsAnalysis() {
     <Layout>
       <div className="flex items-center justify-center h-96">
         <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
-          style={{borderColor: '#d63683', borderTopColor: 'transparent'}} />
+          style={{ borderColor: '#d63683', borderTopColor: 'transparent' }} />
       </div>
     </Layout>
   )
@@ -104,24 +106,25 @@ export default function ReturnsAnalysis() {
       <div className="max-w-6xl mx-auto space-y-5">
 
         {/* Header */}
+        <TrainingButton title="Returns Training" />
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-navy">Returns Analysis</h1>
-            <p className="text-sm mt-0.5" style={{color: '#7880a4'}}>
+            <p className="text-sm mt-0.5" style={{ color: '#7880a4' }}>
               SKUs ranked by return rate · expand any SKU to see channel-wise breakdown
             </p>
           </div>
           <div className="flex items-center gap-3">
             <select value={period} onChange={e => setPeriod(Number(e.target.value))}
               className="px-4 py-2.5 rounded-xl border text-sm text-navy focus:outline-none"
-              style={{borderColor: '#e8e5f0'}}>
+              style={{ borderColor: '#e8e5f0' }}>
               <option value={7}>Last 7 days</option>
               <option value={30}>Last 30 days</option>
               <option value={90}>Last 90 days</option>
             </select>
             <button onClick={fetchData}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border"
-              style={{borderColor: '#e8e5f0', color: '#7880a4', background: 'white'}}>
+              style={{ borderColor: '#e8e5f0', color: '#7880a4', background: 'white' }}>
               <RefreshCw size={15} />
               Refresh
             </button>
@@ -159,23 +162,23 @@ export default function ReturnsAnalysis() {
             },
           ].map(({ label, value, sub, color, bg }) => (
             <div key={label} className="rounded-2xl border p-5"
-              style={{background: bg, borderColor: '#e8e5f0'}}>
+              style={{ background: bg, borderColor: '#e8e5f0' }}>
               <p className="text-xs font-medium uppercase tracking-wider mb-2"
-                style={{color: '#7880a4'}}>{label}</p>
-              <p className="text-3xl font-bold" style={{color}}>{value}</p>
-              <p className="text-xs mt-1 font-medium" style={{color}}>{sub}</p>
+                style={{ color: '#7880a4' }}>{label}</p>
+              <p className="text-3xl font-bold" style={{ color }}>{value}</p>
+              <p className="text-xs mt-1 font-medium" style={{ color }}>{sub}</p>
             </div>
           ))}
         </div>
 
         {/* SKU Table */}
-        <div className="bg-white rounded-2xl border overflow-hidden" style={{borderColor: '#e8e5f0'}}>
+        <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: '#e8e5f0' }}>
 
           {skuData.length === 0 ? (
             <div className="text-center py-16">
-              <Package size={40} className="mx-auto mb-3" style={{color: '#b0b4c8'}} />
+              <Package size={40} className="mx-auto mb-3" style={{ color: '#b0b4c8' }} />
               <p className="font-medium text-navy">No sales data found</p>
-              <p className="text-sm mt-1" style={{color: '#7880a4'}}>
+              <p className="text-sm mt-1" style={{ color: '#7880a4' }}>
                 Enter daily sales with return data to see analysis
               </p>
             </div>
@@ -217,10 +220,10 @@ export default function ReturnsAnalysis() {
                       {/* Product */}
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-1.5 h-10 rounded-full flex-shrink-0"
-                          style={{background: isHigh ? '#dc2626' : isMed ? '#d97706' : '#0f9b58'}} />
+                          style={{ background: isHigh ? '#dc2626' : isMed ? '#d97706' : '#0f9b58' }} />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-navy truncate">{sku.item_name}</p>
-                          <p className="text-xs truncate" style={{color: '#7880a4'}}>
+                          <p className="text-xs truncate" style={{ color: '#7880a4' }}>
                             {sku.sku_code}
                             {sku.variant_name ? ` · ${sku.variant_name}` : ''}
                             {sku.category ? ` · ${sku.category}` : ''}
@@ -234,7 +237,7 @@ export default function ReturnsAnalysis() {
 
                       <div className="text-center">
                         <p className="text-sm font-semibold"
-                          style={{color: sku.units_returned > 0 ? '#dc2626' : '#7880a4'}}>
+                          style={{ color: sku.units_returned > 0 ? '#dc2626' : '#7880a4' }}>
                           {sku.units_returned}
                         </p>
                       </div>
@@ -246,10 +249,10 @@ export default function ReturnsAnalysis() {
                       {/* Return rate with bar */}
                       <div className="flex flex-col items-center gap-1">
                         <p className="text-sm font-bold"
-                          style={{color: isHigh ? '#dc2626' : isMed ? '#d97706' : '#0f9b58'}}>
+                          style={{ color: isHigh ? '#dc2626' : isMed ? '#d97706' : '#0f9b58' }}>
                           {sku.return_rate}%
                         </p>
-                        <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{background: '#f0edf8'}}>
+                        <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: '#f0edf8' }}>
                           <div className="h-full rounded-full"
                             style={{
                               width: `${Math.min(sku.return_rate * 5, 100)}%`,
@@ -262,17 +265,17 @@ export default function ReturnsAnalysis() {
                       <div className="flex justify-center">
                         {isHigh ? (
                           <span className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-                            style={{background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca'}}>
+                            style={{ background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca' }}>
                             🔴 High
                           </span>
                         ) : isMed ? (
                           <span className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-                            style={{background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a'}}>
+                            style={{ background: '#fffbeb', color: '#d97706', border: '1px solid #fde68a' }}>
                             ⚡ Medium
                           </span>
                         ) : (
                           <span className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-                            style={{background: '#f0fdf4', color: '#0f9b58', border: '1px solid #bbf7d0'}}>
+                            style={{ background: '#f0fdf4', color: '#0f9b58', border: '1px solid #bbf7d0' }}>
                             ✓ Normal
                           </span>
                         )}
@@ -281,8 +284,8 @@ export default function ReturnsAnalysis() {
                       {/* Expand icon */}
                       <div className="flex justify-center">
                         {isExpanded
-                          ? <ChevronUp size={16} style={{color: '#7880a4'}} />
-                          : <ChevronDown size={16} style={{color: '#7880a4'}} />
+                          ? <ChevronUp size={16} style={{ color: '#7880a4' }} />
+                          : <ChevronDown size={16} style={{ color: '#7880a4' }} />
                         }
                       </div>
                     </div>
@@ -290,13 +293,13 @@ export default function ReturnsAnalysis() {
                     {/* Channel breakdown — expanded */}
                     {isExpanded && (
                       <div className="border-b px-5 py-4"
-                        style={{background: '#f8f7fc', borderColor: '#f0edf8'}}>
+                        style={{ background: '#f8f7fc', borderColor: '#f0edf8' }}>
                         <p className="text-xs font-semibold uppercase tracking-wider mb-3"
-                          style={{color: '#7880a4'}}>
+                          style={{ color: '#7880a4' }}>
                           Channel-wise Breakdown
                         </p>
                         {channelList.length === 0 ? (
-                          <p className="text-sm" style={{color: '#7880a4'}}>No channel data available</p>
+                          <p className="text-sm" style={{ color: '#7880a4' }}>No channel data available</p>
                         ) : (
                           <div className="space-y-2">
                             {channelList.map(([channel, stats]) => {
@@ -309,19 +312,19 @@ export default function ReturnsAnalysis() {
                               return (
                                 <div key={channel}
                                   className="flex items-center justify-between bg-white rounded-xl px-4 py-3 border"
-                                  style={{borderColor: '#e8e5f0'}}>
+                                  style={{ borderColor: '#e8e5f0' }}>
                                   <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
-                                      style={{background: '#f0f1fa'}}>
+                                      style={{ background: '#f0f1fa' }}>
                                       {channel === 'Amazon' ? '🛒'
                                         : channel === 'Flipkart' ? '🛍'
-                                        : channel === 'Meesho' ? '🏷'
-                                        : channel === 'D2C Website' ? '🌐'
-                                        : '📦'}
+                                          : channel === 'Meesho' ? '🏷'
+                                            : channel === 'D2C Website' ? '🌐'
+                                              : '📦'}
                                     </div>
                                     <div>
                                       <p className="text-sm font-semibold text-navy">{channel}</p>
-                                      <p className="text-xs" style={{color: '#7880a4'}}>
+                                      <p className="text-xs" style={{ color: '#7880a4' }}>
                                         {stats.units_sold} sold · {stats.units_returned} returned
                                       </p>
                                     </div>
@@ -329,7 +332,7 @@ export default function ReturnsAnalysis() {
                                   <div className="flex items-center gap-3">
                                     <div className="text-right">
                                       <p className="text-sm font-bold"
-                                        style={{color: chHigh ? '#dc2626' : chMed ? '#d97706' : '#0f9b58'}}>
+                                        style={{ color: chHigh ? '#dc2626' : chMed ? '#d97706' : '#0f9b58' }}>
                                         {chReturnRate}% return rate
                                       </p>
                                     </div>
@@ -351,9 +354,9 @@ export default function ReturnsAnalysis() {
                         {/* Root cause hint */}
                         {isHigh && (
                           <div className="mt-3 flex items-start gap-2 px-4 py-3 rounded-xl"
-                            style={{background: '#fef2f2', border: '1px solid #fecaca'}}>
+                            style={{ background: '#fef2f2', border: '1px solid #fecaca' }}>
                             <span className="text-base">💡</span>
-                            <p className="text-xs" style={{color: '#dc2626'}}>
+                            <p className="text-xs" style={{ color: '#dc2626' }}>
                               <strong>Investigate:</strong> Check if returns are concentrated on one channel.
                               High returns on Meesho often indicate price-sensitive buyers or listing mismatch.
                               High returns on Amazon may indicate quality or packaging issues.
