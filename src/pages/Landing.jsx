@@ -162,6 +162,10 @@ export default function Landing() {
 
         .nav-links { display: flex; align-items: center; gap: 28px; }
         .nav-cta-secondary { display: flex !important; }
+      .nav-login-mobile { display: none; }
+      @media (max-width: 768px) {
+      .nav-login-mobile { display: flex !important; }
+      }
 
         @media (max-width: 768px) {
           .nav-links { display: none !important; }
@@ -223,6 +227,14 @@ export default function Landing() {
               background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
               color: 'white', padding: '8px 18px', borderRadius: '10px',
               fontSize: '14px', fontWeight: '500', cursor: 'pointer',
+            }}>
+            Log in
+          </button>
+          <button onClick={() => navigate('/login')} className="nav-login-mobile"
+            style={{
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+              color: 'white', padding: '8px 18px', borderRadius: '10px',
+              fontSize: '14px', fontWeight: '500', cursor: 'pointer', display: 'none',
             }}>
             Log in
           </button>
