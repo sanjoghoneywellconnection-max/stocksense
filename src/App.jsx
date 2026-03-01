@@ -19,6 +19,7 @@ import ReturnsAnalysis from './pages/ReturnsAnalysis'
 import CategoryContribution from './pages/CategoryContribution'
 import Profile from './pages/Profile'
 import ResetPassword from './pages/ResetPassword'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 
 function Spinner() {
   return (
@@ -69,6 +70,7 @@ function AppRoutes() {
       <Route path="*" element={<Navigate to="/dashboard" />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/profile" element={<OrgRoute><Profile /></OrgRoute>} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
     </Routes>
   )
 }

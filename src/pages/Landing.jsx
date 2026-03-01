@@ -623,14 +623,24 @@ export default function Landing() {
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>
           © 2026 InventSight · Inventory Intelligence for Indian Brands
         </p>
-        <button onClick={() => navigate('/login')}
-          style={{
-            background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
-            color: 'rgba(255,255,255,0.6)', padding: '8px 20px', borderRadius: '10px',
-            fontSize: '13px', cursor: 'pointer',
-          }}>
-          Log in →
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button onClick={() => navigate('/privacy')}
+            style={{
+              background: 'transparent', border: 'none',
+              color: 'rgba(255,255,255,0.5)', fontSize: '13px',
+              cursor: 'pointer', textDecoration: 'underline',
+            }}>
+            Privacy Policy
+          </button>
+          <button onClick={() => navigate('/login')}
+            style={{
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
+              color: 'rgba(255,255,255,0.6)', padding: '8px 20px', borderRadius: '10px',
+              fontSize: '13px', cursor: 'pointer',
+            }}>
+            Log in →
+          </button>
+        </div>
       </footer>
     </div>
   )
