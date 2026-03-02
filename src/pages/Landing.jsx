@@ -117,23 +117,6 @@ export default function Landing() {
           background-size: 60px 60px;
         }
 
-        .float-1 { animation: float1 6s ease-in-out infinite; }
-        .float-2 { animation: float2 8s ease-in-out infinite; }
-        .float-3 { animation: float3 7s ease-in-out infinite; }
-
-        @keyframes float1 {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(3deg); }
-        }
-        @keyframes float2 {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-14px) rotate(-2deg); }
-        }
-        @keyframes float3 {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-24px); }
-        }
-
         .fade-in {
           opacity: 0;
           transform: translateY(24px);
@@ -162,14 +145,12 @@ export default function Landing() {
 
         .nav-links { display: flex; align-items: center; gap: 28px; }
         .nav-cta-secondary { display: flex !important; }
-      .nav-login-mobile { display: none; }
-      @media (max-width: 768px) {
-      .nav-login-mobile { display: flex !important; }
-      }
+        .nav-login-mobile { display: none; }
 
         @media (max-width: 768px) {
           .nav-links { display: none !important; }
           .nav-cta-secondary { display: none !important; }
+          .nav-login-mobile { display: flex !important; }
           .hero-headline { font-size: 2.2rem !important; line-height: 1.15 !important; }
           .hero-sub { font-size: 1rem !important; }
           .hero-buttons { flex-direction: column; align-items: center; }
@@ -187,6 +168,7 @@ export default function Landing() {
           .final-cta { padding: 60px 20px !important; }
           .final-cta h2 { font-size: 1.8rem !important; }
           .section-title { font-size: 1.6rem !important; }
+          .footer-links { flex-direction: column; gap: 12px !important; align-items: center; }
         }
       `}</style>
 
@@ -222,19 +204,19 @@ export default function Landing() {
             <a href="#how-it-works" className="nav-link" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>How it works</a>
             <a href="#pricing" className="nav-link" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Pricing</a>
           </div>
-          <button onClick={() => navigate('/login')} className="nav-cta-secondary"
-            style={{
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-              color: 'white', padding: '8px 18px', borderRadius: '10px',
-              fontSize: '14px', fontWeight: '500', cursor: 'pointer',
-            }}>
-            Log in
-          </button>
           <button onClick={() => navigate('/login')} className="nav-login-mobile"
             style={{
               background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
               color: 'white', padding: '8px 18px', borderRadius: '10px',
               fontSize: '14px', fontWeight: '500', cursor: 'pointer', display: 'none',
+            }}>
+            Log in
+          </button>
+          <button onClick={() => navigate('/login')} className="nav-cta-secondary"
+            style={{
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+              color: 'white', padding: '8px 18px', borderRadius: '10px',
+              fontSize: '14px', fontWeight: '500', cursor: 'pointer',
             }}>
             Log in
           </button>
@@ -257,7 +239,6 @@ export default function Landing() {
         position: 'relative', overflow: 'hidden',
         padding: '100px 24px 80px',
       }}>
-        {/* Background blobs */}
         <div style={{
           position: 'absolute', top: '10%', right: '5%',
           width: '400px', height: '400px', borderRadius: '50%',
@@ -271,7 +252,6 @@ export default function Landing() {
           pointerEvents: 'none',
         }} />
 
-        {/* Main hero content */}
         <div style={{ maxWidth: '820px', textAlign: 'center', position: 'relative', zIndex: 1, width: '100%' }}>
 
           <div className="fade-in fade-in-1" style={{
@@ -533,9 +513,9 @@ export default function Landing() {
                 'Portfolio Analysis — plain English',
                 'Inventory Trends with visual charts',
                 'Warehouse Map — multi-location ready',
+                'Returns & Category Analysis',
                 'Daily Sales Entry — always free',
                 'Unlimited SKUs and warehouses',
-                'Promo codes for exclusive discounts',
               ].map((f, i) => (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: '12px',
@@ -608,6 +588,7 @@ export default function Landing() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         flexWrap: 'wrap', gap: '16px',
       }}>
+        {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '28px', height: '28px', borderRadius: '8px',
@@ -620,10 +601,14 @@ export default function Landing() {
             InventSight
           </span>
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>
+
+        {/* Copyright */}
+        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', textAlign: 'center' }}>
           © 2026 InventSight · Inventory Intelligence for Indian Brands
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+
+        {/* Footer links */}
+        <div className="footer-links" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button onClick={() => navigate('/privacy')}
             style={{
               background: 'transparent', border: 'none',
@@ -631,6 +616,14 @@ export default function Landing() {
               cursor: 'pointer', textDecoration: 'underline',
             }}>
             Privacy Policy
+          </button>
+          <button onClick={() => navigate('/terms')}
+            style={{
+              background: 'transparent', border: 'none',
+              color: 'rgba(255,255,255,0.5)', fontSize: '13px',
+              cursor: 'pointer', textDecoration: 'underline',
+            }}>
+            Terms & Conditions
           </button>
           <button onClick={() => navigate('/login')}
             style={{

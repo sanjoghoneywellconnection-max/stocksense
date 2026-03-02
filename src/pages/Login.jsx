@@ -5,12 +5,13 @@ import { Eye, EyeOff, Mail, Lock, ArrowLeft, User, Building2 } from 'lucide-reac
 
 export default function Login() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState('login') // 'login' | 'signup' | 'forgot'
+  const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [orgName, setOrgName] = useState('')
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -23,6 +24,7 @@ export default function Login() {
     setConfirmPassword('')
     setFullName('')
     setOrgName('')
+    setAgreedToTerms(false)
     setError('')
     setShowPassword(false)
   }
@@ -31,15 +33,12 @@ export default function Login() {
     e.preventDefault()
     setLoading(true)
     setError('')
-
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-
     if (error) {
       setError('Incorrect email or password. Please try again.')
       setLoading(false)
       return
     }
-
     navigate('/dashboard')
   }
 
@@ -59,16 +58,17 @@ export default function Login() {
       setError('Please enter your business name.')
       return
     }
+    if (!agreedToTerms) {
+      setError('Please read and accept the Terms & Conditions to continue.')
+      return
+    }
 
     setLoading(true)
 
-    // Create auth user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: fullName.trim() }
-      }
+      options: { data: { full_name: fullName.trim() } }
     })
 
     if (authError) {
@@ -84,7 +84,6 @@ export default function Login() {
       return
     }
 
-    // Create organization
     const { data: orgData, error: orgError } = await supabase
       .from('organizations')
       .insert({
@@ -101,7 +100,6 @@ export default function Login() {
       return
     }
 
-    // Create org member
     await supabase.from('org_members').insert({
       org_id: orgData.id,
       user_id: userId,
@@ -116,17 +114,14 @@ export default function Login() {
     e.preventDefault()
     setLoading(true)
     setError('')
-
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
-
     if (error) {
       setError('Could not send reset email. Please check the email address.')
       setLoading(false)
       return
     }
-
     setForgotSent(true)
     setLoading(false)
   }
@@ -314,20 +309,51 @@ export default function Login() {
                   </div>
                 </div>
 
+                {/* Terms & Conditions Checkbox */}
+                <div className="flex items-start gap-3 px-4 py-3 rounded-xl"
+                  style={{background: agreedToTerms ? '#f0fdf4' : '#f8f7fc', border: `1px solid ${agreedToTerms ? '#bbf7d0' : '#e8e5f0'}`}}>
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={agreedToTerms}
+                    onChange={e => setAgreedToTerms(e.target.checked)}
+                    style={{
+                      width: '18px', height: '18px', marginTop: '1px',
+                      accentColor: '#d63683', cursor: 'pointer', flexShrink: 0,
+                    }}
+                  />
+                  <label htmlFor="terms" className="text-sm cursor-pointer" style={{color: '#374151', lineHeight: '1.6'}}>
+                    I have read and agree to the{' '}
+                    <button
+                      type="button"
+                      onClick={() => window.open('/terms', '_blank')}
+                      className="font-semibold underline"
+                      style={{color: '#d63683'}}>
+                      Terms & Conditions
+                    </button>
+                    {' '}and{' '}
+                    <button
+                      type="button"
+                      onClick={() => window.open('/privacy', '_blank')}
+                      className="font-semibold underline"
+                      style={{color: '#d63683'}}>
+                      Privacy Policy
+                    </button>
+                    . I understand my inventory data is encrypted and will never be sold.
+                  </label>
+                </div>
+
                 {error && (
                   <div className="px-4 py-3 rounded-xl text-sm font-medium"
                     style={{background: '#fef2f2', color: '#dc2626'}}>{error}</div>
                 )}
 
                 <button type="submit" disabled={loading}
-                  className="w-full py-3 rounded-xl font-semibold text-white text-sm"
-                  style={{background: loading ? '#9ca3af' : '#d63683'}}>
+                  className="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all"
+                  style={{background: loading ? '#9ca3af' : !agreedToTerms ? '#b0b4c8' : '#d63683',
+                    cursor: !agreedToTerms ? 'not-allowed' : 'pointer'}}>
                   {loading ? 'Creating account...' : 'Start free trial →'}
                 </button>
-
-                <p className="text-xs text-center" style={{color: '#b0b4c8'}}>
-                  By signing up you agree to our terms of service
-                </p>
               </form>
             </>
           )}
