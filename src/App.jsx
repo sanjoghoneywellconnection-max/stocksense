@@ -21,6 +21,8 @@ import Profile from './pages/Profile'
 import ResetPassword from './pages/ResetPassword'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsConditions from './pages/TermsConditions'
+import AdminLogin from './pages/AdminLogin'
+import AdminDashboard from './pages/AdminDashboard'
 
 function Spinner() {
   return (
@@ -73,6 +75,8 @@ function AppRoutes() {
       <Route path="/profile" element={<OrgRoute><Profile /></OrgRoute>} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsConditions />} />
+      <Route path="/admin-inventsight-2026" element={<AdminLogin />} />
+      <Route path="/admin-inventsight-2026/dashboard" element={<AdminDashboard />} />
     </Routes>
   )
 }
