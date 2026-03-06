@@ -1,142 +1,320 @@
-import SubscriptionBadge from './SubscriptionBadge'
-import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { useOrg } from '../hooks/useOrg'
+import SubscriptionBadge from './SubscriptionBadge'
 import {
   LayoutDashboard, Package, AlertTriangle, BarChart3,
   TrendingUp, TrendingDown, Warehouse, ShoppingCart,
   Settings, Menu, X, LogOut, PieChart, User,
   RefreshCw, Lock, Tag, MapPin, ArrowRight,
-  ChevronDown, ChevronUp, CheckCircle, Zap
+  ChevronDown, ChevronUp, CheckCircle, Zap, PlayCircle
 } from 'lucide-react'
 
 const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/skus', icon: Package, label: 'SKU Explorer' },
-  { to: '/reorder', icon: AlertTriangle, label: 'Reorder Planner' },
-  { to: '/bcg', icon: BarChart3, label: 'Portfolio Analysis' },
-  { to: '/trends', icon: TrendingUp, label: 'Inventory Trends' },
-  { to: '/returns', icon: TrendingDown, label: 'Returns Analysis' },
-  { to: '/categories', icon: PieChart, label: 'Category Mix' },
-  { to: '/warehouses-map', icon: Warehouse, label: 'Warehouse Map' },
-  { to: '/sales', icon: ShoppingCart, label: 'Daily Sales Entry' },
-  { to: '/settings', icon: Settings, label: 'Master Data' },
+  { to: '/dashboard',   icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/skus',        icon: Package,         label: 'SKU Explorer' },
+  { to: '/reorder',     icon: AlertTriangle,   label: 'Reorder Planner' },
+  { to: '/bcg',         icon: BarChart3,       label: 'Portfolio Analysis' },
+  { to: '/trends',      icon: TrendingUp,      label: 'Inventory Trends' },
+  { to: '/returns',     icon: TrendingDown,    label: 'Returns Analysis' },
+  { to: '/categories',  icon: PieChart,        label: 'Category Mix' },
+  { to: '/warehouses-map', icon: Warehouse,    label: 'Warehouse Map' },
+  { to: '/sales',       icon: ShoppingCart,    label: 'Daily Sales Entry' },
+  { to: '/settings',    icon: Settings,        label: 'Master Data' },
 ]
 
 export default function Layout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+  const { org } = useOrg()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [location.pathname])
+
+  // Prevent body scroll when sidebar open on mobile
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [sidebarOpen])
 
   async function handleLogout() {
     await supabase.auth.signOut()
     navigate('/login')
   }
 
-  return (
-    <div className="flex h-screen bg-cream overflow-hidden">
+  function handleNavClick(to) {
+    navigate(to)
+    setSidebarOpen(false)
+  }
 
-      {/* Sidebar */}
-      <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-navy flex flex-col
-        transform transition-transform duration-200 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:relative lg:translate-x-0
-      `}>
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-white border-opacity-10">
-          <div className="w-9 h-9 bg-pink rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold">S</span>
+  const SidebarContent = () => (
+    <div style={{
+      display: 'flex', flexDirection: 'column',
+      height: '100%', padding: '0',
+    }}>
+      {/* Logo */}
+      <div style={{
+        padding: '20px 20px 16px',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '10px',
+            background: '#d63683',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <span style={{color: 'white', fontWeight: '800', fontSize: '15px'}}>I</span>
           </div>
-          <span className="text-cream font-bold text-lg">InventSight</span>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto lg:hidden text-cream opacity-60 hover:opacity-100"
-          >
-            <X size={20} />
-          </button>
+          <span style={{color: 'white', fontWeight: '700', fontSize: '17px'}}>InventSight</span>
         </div>
-
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navItems.map(({ to, icon: Icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-                ${isActive
-                  ? 'bg-pink text-white'
-                  : 'text-cream text-opacity-70 hover:bg-white hover:bg-opacity-10 hover:text-cream'
-                }
-              `}
-              style={({ isActive }) => ({
-                color: isActive ? 'white' : 'rgba(254,254,253,0.65)'
-              })}
-            >
-              <Icon size={18} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Logout */}
-        <div className="px-3 py-4 border-t border-white border-opacity-10">
-          <SubscriptionBadge />
-          <button
-            onClick={() => navigate('/profile')}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-white hover:bg-opacity-10 mb-1"
-            style={{ color: 'rgba(255,255,255,0.7)' }}>
-            <User size={18} />
-            My Profile
-          </button>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full transition-all hover:bg-white hover:bg-opacity-10"
-            style={{ color: 'rgba(254,254,253,0.65)' }}
-          >
-            <LogOut size={18} />
-            Log Out
-          </button>
-        </div>
-      </aside>
-
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+        {/* Close button — mobile only */}
+        <button
           onClick={() => setSidebarOpen(false)}
-        />
+          style={{
+            display: 'none',
+            background: 'rgba(255,255,255,0.1)',
+            border: 'none', color: 'white',
+            width: '32px', height: '32px',
+            borderRadius: '8px', cursor: 'pointer',
+            alignItems: 'center', justifyContent: 'center',
+          }}
+          className="sidebar-close-btn">
+          <X size={16} />
+        </button>
+      </div>
+
+      {/* Org name */}
+      {org && (
+        <div style={{padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)'}}>
+          <p style={{color: 'rgba(255,255,255,0.4)', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '2px'}}>
+            Organisation
+          </p>
+          <p style={{color: 'rgba(255,255,255,0.85)', fontSize: '13px', fontWeight: '500', truncate: true}}>
+            {org.name}
+          </p>
+        </div>
       )}
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="bg-cream border-b px-4 py-3 flex items-center gap-3 flex-shrink-0" style={{ borderColor: '#e8e5f0' }}>
+      {/* Nav items */}
+      <div style={{flex: 1, overflowY: 'auto', padding: '12px 12px'}}>
+        {navItems.map(({ to, icon: Icon, label }) => {
+          const isActive = location.pathname === to
+          return (
+            <button
+              key={to}
+              onClick={() => handleNavClick(to)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px',
+                width: '100%', padding: '11px 12px',
+                borderRadius: '12px', border: 'none',
+                background: isActive ? 'rgba(214,54,131,0.2)' : 'transparent',
+                color: isActive ? 'white' : 'rgba(255,255,255,0.6)',
+                cursor: 'pointer', textAlign: 'left',
+                marginBottom: '2px',
+                transition: 'all 0.15s ease',
+                fontSize: '14px', fontWeight: isActive ? '600' : '400',
+                borderLeft: isActive ? '3px solid #d63683' : '3px solid transparent',
+              }}>
+              <Icon size={17} style={{flexShrink: 0}} />
+              {label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Bottom section */}
+      <div style={{
+        padding: '12px',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+      }}>
+        <SubscriptionBadge />
+
+        <button
+          onClick={() => handleNavClick('/profile')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            width: '100%', padding: '10px 12px',
+            borderRadius: '12px', border: 'none',
+            background: location.pathname === '/profile' ? 'rgba(255,255,255,0.1)' : 'transparent',
+            color: 'rgba(255,255,255,0.6)',
+            cursor: 'pointer', textAlign: 'left',
+            fontSize: '14px', marginBottom: '4px',
+            transition: 'all 0.15s ease',
+          }}>
+          <User size={17} style={{flexShrink: 0}} />
+          My Profile
+        </button>
+
+        <button
+          onClick={handleLogout}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            width: '100%', padding: '10px 12px',
+            borderRadius: '12px', border: 'none',
+            background: 'transparent',
+            color: 'rgba(255,255,255,0.4)',
+            cursor: 'pointer', textAlign: 'left',
+            fontSize: '14px',
+            transition: 'all 0.15s ease',
+          }}>
+          <LogOut size={17} style={{flexShrink: 0}} />
+          Log Out
+        </button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{display: 'flex', minHeight: '100vh', background: '#f8f7fc'}}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+        .text-navy { color: #1e2b71; }
+
+        /* Desktop sidebar */
+        .desktop-sidebar {
+          width: 240px;
+          flex-shrink: 0;
+          background: #1e2b71;
+          min-height: 100vh;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Mobile sidebar overlay */
+        .mobile-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 200;
+          background: rgba(0,0,0,0.6);
+          backdrop-filter: blur(2px);
+        }
+        .mobile-sidebar-drawer {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 260px;
+          height: 100vh;
+          background: #1e2b71;
+          z-index: 201;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          transform: translateX(-100%);
+          transition: transform 0.25s ease;
+        }
+        .mobile-sidebar-drawer.open {
+          transform: translateX(0);
+        }
+
+        /* Mobile top bar */
+        .mobile-topbar {
+          display: none;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 16px;
+          height: 56px;
+          background: #1e2b71;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+          .desktop-sidebar { display: none !important; }
+          .mobile-overlay.open { display: block; }
+          .mobile-topbar { display: flex; }
+          .sidebar-close-btn { display: flex !important; }
+          .main-content { padding: 16px !important; }
+        }
+
+        @media (min-width: 769px) {
+          .mobile-topbar { display: none !important; }
+          .mobile-overlay { display: none !important; }
+          .mobile-sidebar-drawer { display: none !important; }
+        }
+
+        button:hover { opacity: 0.9; }
+      `}</style>
+
+      {/* ── DESKTOP SIDEBAR ── */}
+      <aside className="desktop-sidebar">
+        <SidebarContent />
+      </aside>
+
+      {/* ── MOBILE OVERLAY + DRAWER ── */}
+      <div
+        className={`mobile-overlay ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      <aside className={`mobile-sidebar-drawer ${sidebarOpen ? 'open' : ''}`}>
+        <SidebarContent />
+      </aside>
+
+      {/* ── MAIN CONTENT ── */}
+      <div style={{flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0}}>
+
+        {/* Mobile top bar */}
+        <div className="mobile-topbar">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-navy flex-shrink-0"
-          >
-            <Menu size={22} />
+            style={{
+              background: 'rgba(255,255,255,0.1)', border: 'none',
+              color: 'white', width: '36px', height: '36px',
+              borderRadius: '10px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+            <Menu size={18} />
           </button>
-          <div className="flex items-center gap-2 lg:hidden">
-            <div className="w-7 h-7 bg-pink rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-sm">I</span>
+
+          <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+            <div style={{
+              width: '26px', height: '26px', borderRadius: '8px',
+              background: '#d63683',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{color: 'white', fontWeight: '800', fontSize: '12px'}}>I</span>
             </div>
-            <span className="font-bold text-navy text-sm">InventSight</span>
+            <span style={{color: 'white', fontWeight: '700', fontSize: '15px'}}>InventSight</span>
           </div>
-          <div className="flex-1" />
-          <div className="w-8 h-8 bg-pink rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-sm font-bold">S</span>
+
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '10px',
+            background: '#d63683',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+            onClick={() => handleNavClick('/profile')}>
+            <User size={16} color="white" />
           </div>
-        </header>
+        </div>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main
+          className="main-content"
+          style={{
+            flex: 1, padding: '28px 28px',
+            fontFamily: "'DM Sans', sans-serif",
+            maxWidth: '100%', overflowX: 'hidden',
+          }}>
           {children}
         </main>
       </div>
-
     </div>
   )
 }
