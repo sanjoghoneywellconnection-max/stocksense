@@ -560,6 +560,93 @@ export default function Landing() {
           fontFamily: 'Sora, sans-serif', fontSize: '2.4rem', fontWeight: '800',
           color: 'white', marginBottom: '16px', maxWidth: '600px', margin: '0 auto 16px',
         }}>
+          {/* Blog preview */}
+          <section style={{ background: 'white', padding: '80px 24px' }}>
+            <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '40px' }}>
+                <div>
+                  <p style={{ color: BRAND_COLORS.pink, fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
+                    From the blog
+                  </p>
+                  <h2 style={{ fontFamily: 'Sora, sans-serif', fontSize: '1.8rem', fontWeight: '800', color: BRAND_COLORS.navy }}>
+                    Inventory insights for D2C founders
+                  </h2>
+                </div>
+                <button onClick={() => navigate('/blog')}
+                  style={{
+                    background: 'transparent', border: `2px solid ${BRAND_COLORS.navy}`,
+                    color: BRAND_COLORS.navy, padding: '10px 24px', borderRadius: '12px',
+                    fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+                  }}>
+                  View all articles →
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+                {[
+                  {
+                    emoji: '📦',
+                    category: 'Inventory Management',
+                    categoryColor: '#7c3aed',
+                    title: 'What is Days of Cover — and why every D2C brand needs to track it',
+                    readTime: '4 min read',
+                    slug: 'what-is-days-of-cover',
+                  },
+                  {
+                    emoji: '🚨',
+                    category: 'Amazon & Flipkart',
+                    categoryColor: '#d97706',
+                    title: 'The hidden cost of going out of stock on Amazon',
+                    readTime: '5 min read',
+                    slug: 'amazon-flipkart-stockout-cost',
+                  },
+                  {
+                    emoji: '📊',
+                    category: 'D2C Brand Growth',
+                    categoryColor: '#0891b2',
+                    title: 'Why your Excel inventory sheet will eventually break your business',
+                    readTime: '6 min read',
+                    slug: 'drr-vs-excel',
+                  },
+                ].map((post, i) => (
+                  <div key={i}
+                    onClick={() => navigate(`/blog/${post.slug}`)}
+                    style={{
+                      background: '#faf9fd', borderRadius: '20px',
+                      border: '1px solid #ede9f8', overflow: 'hidden',
+                      cursor: 'pointer', transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(30,43,113,0.1)' }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                    <div style={{
+                      background: 'linear-gradient(135deg, #1e2b71 0%, #2d3e9e 100%)',
+                      padding: '28px', textAlign: 'center', fontSize: '40px',
+                    }}>
+                      {post.emoji}
+                    </div>
+                    <div style={{ padding: '20px' }}>
+                      <span style={{
+                        background: `${post.categoryColor}15`, color: post.categoryColor,
+                        padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: '600',
+                      }}>
+                        {post.category}
+                      </span>
+                      <h3 style={{
+                        fontFamily: 'Sora, sans-serif', fontSize: '15px', fontWeight: '700',
+                        color: BRAND_COLORS.navy, margin: '12px 0 16px', lineHeight: '1.5',
+                      }}>
+                        {post.title}
+                      </h3>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <p style={{ fontSize: '12px', color: '#7880a4' }}>{post.readTime}</p>
+                        <span style={{ color: BRAND_COLORS.pink, fontSize: '13px', fontWeight: '600' }}>Read →</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
           Your next stockout is preventable.
         </h2>
         <p style={{
@@ -632,6 +719,14 @@ export default function Landing() {
               fontSize: '13px', cursor: 'pointer',
             }}>
             Log in →
+          </button>
+          <button onClick={() => navigate('/blog')}
+            style={{
+              background: 'transparent', border: 'none',
+              color: 'rgba(255,255,255,0.5)', fontSize: '13px',
+              cursor: 'pointer', textDecoration: 'underline',
+            }}>
+            Blog
           </button>
         </div>
       </footer>

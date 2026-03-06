@@ -23,6 +23,8 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsConditions from './pages/TermsConditions'
 import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
+import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
 
 function Spinner() {
   return (
@@ -77,6 +79,8 @@ function AppRoutes() {
       <Route path="/terms" element={<TermsConditions />} />
       <Route path="/admin-inventsight-2026" element={<AdminLogin />} />
       <Route path="/admin-inventsight-2026/dashboard" element={<AdminDashboard />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
     </Routes>
   )
 }
