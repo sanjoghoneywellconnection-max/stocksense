@@ -35,10 +35,11 @@ export default function ReorderPlanner() {
 
         if (!metrics) { setLoading(false); return }
 
-        // Deduplicate by sku_id
+        // Deduplicate by sku_id + filter out inactive/discontinued SKUs
         const seen = new Set()
         const unique = (metrics || []).filter(m => {
             if (seen.has(m.sku_id)) return false
+            if (!m.skus) return false // orphaned metric — SKU deleted
             seen.add(m.sku_id); return true
         })
 

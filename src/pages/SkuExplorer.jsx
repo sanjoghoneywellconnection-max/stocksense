@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { useOrg } from '../hooks/useOrg'
 import { supabase } from '../supabaseClient'
-import { Search, Filter, ChevronDown, ChevronUp, Package, RefreshCw } from 'lucide-react'
+import { Search, ChevronDown, ChevronUp, Package, RefreshCw } from 'lucide-react'
 import TrainingButton from '../components/TrainingButton'
 
 const DOC_CONFIG = {
-  green:  { label: 'Healthy',   color: '#0f9b58', bg: '#f0fdf4', border: '#bbf7d0' },
-  amber:  { label: 'Plan Now',  color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
-  red:    { label: 'Act Now',   color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
-  black:  { label: 'Critical',  color: '#111827', bg: '#f3f4f6', border: '#d1d5db' },
+  green: { label: 'Healthy',  color: '#0f9b58', bg: '#f0fdf4', border: '#bbf7d0' },
+  amber: { label: 'Plan Now', color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
+  red:   { label: 'Act Now',  color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
+  black: { label: 'Critical', color: '#111827', bg: '#f3f4f6', border: '#d1d5db' },
 }
 
 const BCG_CONFIG = {
@@ -28,17 +28,13 @@ export default function SkuExplorer() {
   const [expandedSku, setExpandedSku] = useState(null)
   const [warehouseStock, setWarehouseStock] = useState({})
 
-  // Filters
   const [search, setSearch] = useState('')
   const [docFilter, setDocFilter] = useState('all')
   const [bcgFilter, setBcgFilter] = useState('all')
-
-  // Sort
   const [sortBy, setSortBy] = useState('doc_days')
   const [sortDir, setSortDir] = useState('asc')
 
   useEffect(() => { if (org) fetchSkus() }, [org])
-
   useEffect(() => { applyFilters() }, [skus, search, docFilter, bcgFilter, sortBy, sortDir])
 
   async function fetchSkus() {
@@ -55,6 +51,7 @@ export default function SkuExplorer() {
           id, sku_code, item_name, variant_name,
           lead_time_days, lead_time_type, vendor_name,
           mrp, cost_price, selling_price, minimum_order_qty,
+          status,
           brands_master(name), categories(name)
         )
       `)
@@ -63,7 +60,7 @@ export default function SkuExplorer() {
 
     if (error) { console.error(error); setLoading(false); return }
 
-    // Deduplicate — keep only latest metrics per SKU
+    // Deduplicate — keep latest per SKU
     const seen = new Set()
     const unique = (data || []).filter(m => {
       if (seen.has(m.sku_id)) return false
@@ -71,12 +68,17 @@ export default function SkuExplorer() {
       return true
     })
 
-    setSkus(unique)
+    // Filter out inactive / discontinued / orphaned SKUs
+    const activeOnly = unique.filter(m =>
+      m.skus !== null && m.skus !== undefined && m.skus.status === 'active'
+    )
+
+    setSkus(activeOnly)
     setLoading(false)
   }
 
   async function fetchWarehouseStock(skuId) {
-    if (warehouseStock[skuId]) return // already fetched
+    if (warehouseStock[skuId]) return
     const { data } = await supabase
       .from('sku_warehouse_stock')
       .select('current_qty, opening_qty, warehouses(name, city, type)')
@@ -145,10 +147,10 @@ export default function SkuExplorer() {
   }
 
   const counts = {
-    all: skus.length,
+    all:   skus.length,
     green: skus.filter(s => s.doc_status === 'green').length,
     amber: skus.filter(s => s.doc_status === 'amber').length,
-    red: skus.filter(s => s.doc_status === 'red').length,
+    red:   skus.filter(s => s.doc_status === 'red').length,
     black: skus.filter(s => s.doc_status === 'black').length,
   }
 
@@ -166,30 +168,32 @@ export default function SkuExplorer() {
       <div className="max-w-7xl mx-auto space-y-5">
 
         {/* Header */}
-        <TrainingButton title="SKU Explorer Training" />
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-navy">SKU Explorer</h1>
             <p className="text-sm mt-0.5" style={{color: '#7880a4'}}>
-              {skus.length} SKUs monitored · Click any row to see warehouse breakdown
+              {skus.length} active SKUs monitored · Click any row to see warehouse breakdown
             </p>
           </div>
-          <button onClick={handleRefresh} disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all"
-            style={{borderColor: '#e8e5f0', color: '#7880a4', background: 'white'}}>
-            <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
-            {refreshing ? 'Recalculating...' : 'Refresh'}
-          </button>
+          <div className="flex items-center gap-3">
+            <TrainingButton title="SKU Explorer Training" />
+            <button onClick={handleRefresh} disabled={refreshing}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all"
+              style={{borderColor: '#e8e5f0', color: '#7880a4', background: 'white'}}>
+              <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
+              {refreshing ? 'Recalculating...' : 'Refresh'}
+            </button>
+          </div>
         </div>
 
         {/* DOC Filter tabs */}
         <div className="flex gap-2 flex-wrap">
           {[
-            { key: 'all', label: `All SKUs (${counts.all})`, color: '#1e2b71', activeBg: '#1e2b71' },
-            { key: 'green', label: `✓ Healthy (${counts.green})`, color: '#0f9b58', activeBg: '#0f9b58' },
-            { key: 'amber', label: `⚡ Plan Now (${counts.amber})`, color: '#d97706', activeBg: '#d97706' },
-            { key: 'red', label: `🔴 Act Now (${counts.red})`, color: '#dc2626', activeBg: '#dc2626' },
-            { key: 'black', label: `⚫ Critical (${counts.black})`, color: '#111827', activeBg: '#111827' },
+            { key: 'all',   label: `All SKUs (${counts.all})`,       color: '#1e2b71', activeBg: '#1e2b71' },
+            { key: 'green', label: `✓ Healthy (${counts.green})`,    color: '#0f9b58', activeBg: '#0f9b58' },
+            { key: 'amber', label: `⚡ Plan Now (${counts.amber})`,  color: '#d97706', activeBg: '#d97706' },
+            { key: 'red',   label: `🔴 Act Now (${counts.red})`,     color: '#dc2626', activeBg: '#dc2626' },
+            { key: 'black', label: `⚫ Critical (${counts.black})`,  color: '#111827', activeBg: '#111827' },
           ].map(tab => (
             <button key={tab.key} onClick={() => setDocFilter(tab.key)}
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all border"
@@ -211,14 +215,12 @@ export default function SkuExplorer() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by SKU name, code, or variant..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-navy focus:outline-none focus:ring-2 focus:ring-pink"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-navy focus:outline-none"
               style={{borderColor: '#e8e5f0'}}
             />
           </div>
-          <select
-            value={bcgFilter}
-            onChange={e => setBcgFilter(e.target.value)}
-            className="px-4 py-2.5 rounded-xl border text-sm text-navy focus:outline-none focus:ring-2 focus:ring-pink"
+          <select value={bcgFilter} onChange={e => setBcgFilter(e.target.value)}
+            className="px-4 py-2.5 rounded-xl border text-sm text-navy focus:outline-none"
             style={{borderColor: '#e8e5f0'}}>
             <option value="all">All Categories</option>
             <option value="star">🚀 Fast Movers</option>
@@ -231,7 +233,6 @@ export default function SkuExplorer() {
         {/* Table */}
         <div className="bg-white rounded-2xl border overflow-hidden" style={{borderColor: '#e8e5f0'}}>
 
-          {/* Table header */}
           <div className="grid text-xs font-semibold uppercase tracking-wider px-5 py-3 border-b"
             style={{
               gridTemplateColumns: '2fr 90px 90px 90px 100px 110px 120px 40px',
@@ -257,7 +258,6 @@ export default function SkuExplorer() {
             <span />
           </div>
 
-          {/* Rows */}
           {filtered.length === 0 && (
             <div className="text-center py-16">
               <Package size={40} className="mx-auto mb-3" style={{color: '#b0b4c8'}} />
@@ -278,20 +278,15 @@ export default function SkuExplorer() {
             const stocks = warehouseStock[metric.sku_id] || []
 
             return (
-              <div key={metric.sku_id}
-                className="border-b last:border-0"
-                style={{borderColor: '#f0edf8'}}>
+              <div key={metric.sku_id} className="border-b last:border-0" style={{borderColor: '#f0edf8'}}>
 
-                {/* Main row */}
                 <div
                   className="grid items-center px-5 py-3.5 cursor-pointer hover:bg-gray-50 transition-colors"
                   style={{ gridTemplateColumns: '2fr 90px 90px 90px 100px 110px 120px 40px' }}
-                  onClick={() => toggleExpand(metric.sku_id)}
-                >
-                  {/* Product */}
+                  onClick={() => toggleExpand(metric.sku_id)}>
+
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-1.5 h-10 rounded-full flex-shrink-0"
-                      style={{background: doc.color}} />
+                    <div className="w-1.5 h-10 rounded-full flex-shrink-0" style={{background: doc.color}} />
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-navy truncate">{sku?.item_name}</p>
                       <p className="text-xs truncate" style={{color: '#7880a4'}}>
@@ -302,13 +297,11 @@ export default function SkuExplorer() {
                     </div>
                   </div>
 
-                  {/* Stock */}
                   <div className="text-center">
                     <p className="text-sm font-semibold text-navy">{metric.total_current_stock}</p>
                     <p className="text-xs" style={{color: '#b0b4c8'}}>units</p>
                   </div>
 
-                  {/* DRR 30d */}
                   <div className="text-center">
                     <p className="text-sm font-semibold text-navy">
                       {parseFloat(metric.drr_30d || 0).toFixed(1)}
@@ -316,7 +309,6 @@ export default function SkuExplorer() {
                     <p className="text-xs" style={{color: '#b0b4c8'}}>/day</p>
                   </div>
 
-                  {/* DOC */}
                   <div className="text-center">
                     <p className="text-sm font-semibold" style={{color: doc.color}}>
                       {metric.doc_days > 0 ? `${parseFloat(metric.doc_days).toFixed(0)}d` : 'OOS'}
@@ -324,7 +316,6 @@ export default function SkuExplorer() {
                     <p className="text-xs" style={{color: '#b0b4c8'}}>cover</p>
                   </div>
 
-                  {/* Status badge */}
                   <div className="flex justify-center">
                     <span className="text-xs font-semibold px-2.5 py-1 rounded-lg"
                       style={{background: doc.bg, color: doc.color, border: `1px solid ${doc.border}`}}>
@@ -332,7 +323,6 @@ export default function SkuExplorer() {
                     </span>
                   </div>
 
-                  {/* BCG / Category */}
                   <div className="flex justify-center">
                     <span className="text-xs font-medium px-2.5 py-1 rounded-lg"
                       style={{background: bcg.bg, color: bcg.color}}>
@@ -340,11 +330,11 @@ export default function SkuExplorer() {
                     </span>
                   </div>
 
-                  {/* Reorder deadline */}
                   <div className="text-center">
                     {metric.days_to_reorder !== null && metric.days_to_reorder <= 14 ? (
                       <div>
-                        <p className="text-sm font-semibold" style={{color: metric.days_to_reorder <= 7 ? '#dc2626' : '#d97706'}}>
+                        <p className="text-sm font-semibold"
+                          style={{color: metric.days_to_reorder <= 7 ? '#dc2626' : '#d97706'}}>
                           {metric.days_to_reorder === 0 ? 'Today!' : `${metric.days_to_reorder}d`}
                         </p>
                         <p className="text-xs" style={{color: '#b0b4c8'}}>to order</p>
@@ -361,33 +351,29 @@ export default function SkuExplorer() {
                     )}
                   </div>
 
-                  {/* Expand icon */}
                   <div className="flex justify-center">
                     {isExpanded
                       ? <ChevronUp size={16} style={{color: '#7880a4'}} />
-                      : <ChevronDown size={16} style={{color: '#7880a4'}} />
-                    }
+                      : <ChevronDown size={16} style={{color: '#7880a4'}} />}
                   </div>
                 </div>
 
-                {/* Expanded detail panel */}
                 {isExpanded && (
                   <div className="px-5 pb-5 pt-2 border-t" style={{borderColor: '#f0edf8', background: '#faf9fd'}}>
                     <div className="grid grid-cols-2 gap-5">
 
-                      {/* Left — metrics detail */}
                       <div className="space-y-3">
                         <p className="text-xs font-semibold uppercase tracking-wider" style={{color: '#7880a4'}}>
                           Sales Velocity
                         </p>
                         <div className="grid grid-cols-3 gap-3">
                           {[
-                            { label: '7-day DRR', value: parseFloat(metric.drr_7d || 0).toFixed(1) + '/day' },
-                            { label: '30-day DRR', value: parseFloat(metric.drr_30d || 0).toFixed(1) + '/day' },
-                            { label: '90-day DRR', value: parseFloat(metric.drr_90d || 0).toFixed(1) + '/day' },
-                            { label: 'Units Sold (30d)', value: metric.units_sold_30d || 0 },
-                            { label: 'Revenue (30d)', value: `Rs. ${((metric.revenue_30d || 0) / 1000).toFixed(1)}K` },
-                            { label: 'Growth Rate', value: `${parseFloat(metric.growth_rate_pct || 0).toFixed(1)}%` },
+                            { label: '7-day DRR',      value: parseFloat(metric.drr_7d || 0).toFixed(1) + '/day' },
+                            { label: '30-day DRR',     value: parseFloat(metric.drr_30d || 0).toFixed(1) + '/day' },
+                            { label: '90-day DRR',     value: parseFloat(metric.drr_90d || 0).toFixed(1) + '/day' },
+                            { label: 'Units Sold 30d', value: metric.units_sold_30d || 0 },
+                            { label: 'Revenue 30d',    value: `Rs. ${((metric.revenue_30d || 0) / 1000).toFixed(1)}K` },
+                            { label: 'Growth Rate',    value: `${parseFloat(metric.growth_rate_pct || 0).toFixed(1)}%` },
                           ].map(({ label, value }) => (
                             <div key={label} className="bg-white rounded-xl p-3 border" style={{borderColor: '#e8e5f0'}}>
                               <p className="text-xs" style={{color: '#7880a4'}}>{label}</p>
@@ -401,12 +387,12 @@ export default function SkuExplorer() {
                         </p>
                         <div className="grid grid-cols-3 gap-3">
                           {[
-                            { label: 'Lead Time', value: `${sku?.lead_time_days} days` },
-                            { label: 'MOQ', value: `${sku?.minimum_order_qty} units` },
-                            { label: 'Reorder Point', value: `${metric.reorder_point_qty} units` },
-                            { label: 'Cost Price', value: `Rs. ${sku?.cost_price}` },
-                            { label: 'Selling Price', value: `Rs. ${sku?.selling_price}` },
-                            { label: 'MRP', value: `Rs. ${sku?.mrp}` },
+                            { label: 'Lead Time',    value: `${sku?.lead_time_days} days` },
+                            { label: 'MOQ',          value: `${sku?.minimum_order_qty} units` },
+                            { label: 'Reorder Point',value: `${metric.reorder_point_qty} units` },
+                            { label: 'Cost Price',   value: `Rs. ${sku?.cost_price}` },
+                            { label: 'Selling Price',value: `Rs. ${sku?.selling_price}` },
+                            { label: 'MRP',          value: `Rs. ${sku?.mrp}` },
                           ].map(({ label, value }) => (
                             <div key={label} className="bg-white rounded-xl p-3 border" style={{borderColor: '#e8e5f0'}}>
                               <p className="text-xs" style={{color: '#7880a4'}}>{label}</p>
@@ -416,7 +402,6 @@ export default function SkuExplorer() {
                         </div>
                       </div>
 
-                      {/* Right — warehouse stock breakdown */}
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{color: '#7880a4'}}>
                           Stock by Warehouse
@@ -433,9 +418,7 @@ export default function SkuExplorer() {
                                 <div key={i} className="bg-white rounded-xl p-4 border" style={{borderColor: '#e8e5f0'}}>
                                   <div className="flex items-center justify-between mb-2">
                                     <div>
-                                      <p className="text-sm font-semibold text-navy">
-                                        {s.warehouses?.name}
-                                      </p>
+                                      <p className="text-sm font-semibold text-navy">{s.warehouses?.name}</p>
                                       <p className="text-xs" style={{color: '#7880a4'}}>
                                         {s.warehouses?.city} · {s.warehouses?.type?.toUpperCase()}
                                       </p>
@@ -445,7 +428,6 @@ export default function SkuExplorer() {
                                       <p className="text-xs" style={{color: '#7880a4'}}>units · {pct}%</p>
                                     </div>
                                   </div>
-                                  {/* Stock bar */}
                                   <div className="h-2 rounded-full overflow-hidden" style={{background: '#f0edf8'}}>
                                     <div className="h-full rounded-full transition-all"
                                       style={{
@@ -456,8 +438,6 @@ export default function SkuExplorer() {
                                 </div>
                               )
                             })}
-
-                            {/* Total */}
                             <div className="flex items-center justify-between px-4 py-3 rounded-xl"
                               style={{background: '#1e2b71'}}>
                               <p className="text-sm font-semibold text-white">Total Stock</p>
@@ -480,7 +460,6 @@ export default function SkuExplorer() {
             )
           })}
         </div>
-
       </div>
     </Layout>
   )

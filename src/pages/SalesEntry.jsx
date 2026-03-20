@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { useOrg } from '../hooks/useOrg'
 import { supabase } from '../supabaseClient'
-import { Save, ChevronDown, CheckCircle, ShoppingBag } from 'lucide-react'
+import { Save, CheckCircle, ShoppingBag } from 'lucide-react'
 
 const CHANNELS = [
   { value: 'amazon_india', label: 'Amazon India' },
-  { value: 'flipkart', label: 'Flipkart' },
-  { value: 'meesho', label: 'Meesho' },
+  { value: 'flipkart',     label: 'Flipkart' },
+  { value: 'meesho',       label: 'Meesho' },
 ]
 
 export default function SalesEntry() {
@@ -22,9 +22,7 @@ export default function SalesEntry() {
   const [saved, setSaved] = useState(false)
   const [existingData, setExistingData] = useState({})
 
-  useEffect(() => {
-    if (org) fetchMasterData()
-  }, [org])
+  useEffect(() => { if (org) fetchMasterData() }, [org])
 
   useEffect(() => {
     if (org && warehouseId && date && channel) fetchExistingEntries()
@@ -32,13 +30,22 @@ export default function SalesEntry() {
 
   async function fetchMasterData() {
     const [skuRes, whRes] = await Promise.all([
-      supabase.from('skus').select('id, sku_code, item_name, variant_name')
-        .eq('org_id', org.id).eq('is_active', true).order('item_name'),
-      supabase.from('warehouses').select('id, name, city')
-        .eq('org_id', org.id).eq('is_active', true).order('name'),
+      supabase.from('skus')
+        .select('id, sku_code, item_name, variant_name')
+        .eq('org_id', org.id)
+        .eq('is_active', true)
+        .eq('status', 'active')        // ← only active SKUs
+        .order('item_name'),
+      supabase.from('warehouses')
+        .select('id, name, city')
+        .eq('org_id', org.id)
+        .eq('is_active', true)
+        .order('name'),
     ])
+
     const skuData = skuRes.data || []
     const whData = whRes.data || []
+
     setSkus(skuData)
     setWarehouses(whData)
     if (whData.length > 0) setWarehouseId(whData[0].id)
@@ -98,12 +105,10 @@ export default function SalesEntry() {
         const unitsSold = parseInt(entry.units_sold) || 0
         const unitsReturned = parseInt(entry.units_returned) || 0
 
-        const sku = skus.find(s => s.id === entry.sku_id)
         const { data: skuDetails } = await supabase
           .from('skus').select('selling_price').eq('id', entry.sku_id).single()
 
         const gmv = unitsSold * (skuDetails?.selling_price || 0)
-
         const existing = existingData[entry.sku_id]
 
         if (existing) {
@@ -146,7 +151,6 @@ export default function SalesEntry() {
     <Layout>
       <div className="max-w-4xl mx-auto">
 
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-navy">Daily Sales Entry</h1>
           <p className="text-sm mt-1" style={{color: '#7880a4'}}>
@@ -159,22 +163,15 @@ export default function SalesEntry() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-navy mb-1.5">Date</label>
-              <input
-                type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border text-navy text-sm focus:outline-none focus:ring-2 focus:ring-pink"
-                style={{borderColor: '#e8e5f0'}}
-              />
+              <input type="date" value={date} onChange={e => setDate(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border text-navy text-sm focus:outline-none"
+                style={{borderColor: '#e8e5f0'}} />
             </div>
             <div>
               <label className="block text-xs font-medium text-navy mb-1.5">Channel</label>
-              <select
-                value={channel}
-                onChange={e => setChannel(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border text-navy text-sm focus:outline-none focus:ring-2 focus:ring-pink"
-                style={{borderColor: '#e8e5f0'}}
-              >
+              <select value={channel} onChange={e => setChannel(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border text-navy text-sm focus:outline-none"
+                style={{borderColor: '#e8e5f0'}}>
                 {CHANNELS.map(c => (
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
@@ -182,12 +179,9 @@ export default function SalesEntry() {
             </div>
             <div>
               <label className="block text-xs font-medium text-navy mb-1.5">Warehouse</label>
-              <select
-                value={warehouseId}
-                onChange={e => setWarehouseId(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border text-navy text-sm focus:outline-none focus:ring-2 focus:ring-pink"
-                style={{borderColor: '#e8e5f0'}}
-              >
+              <select value={warehouseId} onChange={e => setWarehouseId(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border text-navy text-sm focus:outline-none"
+                style={{borderColor: '#e8e5f0'}}>
                 {warehouses.map(w => (
                   <option key={w.id} value={w.id}>{w.name} — {w.city}</option>
                 ))}
@@ -209,7 +203,6 @@ export default function SalesEntry() {
 
         {/* SKU Entry Table */}
         <div className="bg-white rounded-2xl border overflow-hidden mb-5" style={{borderColor: '#e8e5f0'}}>
-          {/* Table header */}
           <div className="grid px-5 py-3 text-xs font-semibold uppercase tracking-wider border-b"
             style={{gridTemplateColumns: '1fr 120px 120px 80px', borderColor: '#e8e5f0', color: '#7880a4', background: '#f8f7fc'}}>
             <span>Product</span>
@@ -218,31 +211,26 @@ export default function SalesEntry() {
             <span className="text-center">Stock</span>
           </div>
 
-          {/* Rows */}
           <div className="divide-y" style={{divideColor: '#e8e5f0'}}>
             {entries.length === 0 && (
               <div className="text-center py-12">
                 <ShoppingBag size={36} className="mx-auto mb-3" style={{color: '#b0b4c8'}} />
-                <p className="text-sm text-navy font-medium">No SKUs found</p>
-                <p className="text-xs mt-1" style={{color: '#b0b4c8'}}>Add SKUs in Master Data → Settings first</p>
+                <p className="text-sm text-navy font-medium">No active SKUs found</p>
+                <p className="text-xs mt-1" style={{color: '#b0b4c8'}}>
+                  Add SKUs in Master Data or check that your SKUs are set to Active
+                </p>
               </div>
             )}
             {entries.map(entry => {
               const hasData = existingData[entry.sku_id]
               return (
-                <div
-                  key={entry.sku_id}
+                <div key={entry.sku_id}
                   className="grid items-center px-5 py-3 hover:bg-gray-50 transition-colors"
-                  style={{gridTemplateColumns: '1fr 120px 120px 80px'}}
-                >
-                  {/* Product name */}
+                  style={{gridTemplateColumns: '1fr 120px 120px 80px'}}>
+
                   <div className="flex items-center gap-3 min-w-0">
-                    {hasData && (
-                      <div className="w-1.5 h-8 rounded-full flex-shrink-0" style={{background: '#d63683'}} />
-                    )}
-                    {!hasData && (
-                      <div className="w-1.5 h-8 rounded-full flex-shrink-0" style={{background: '#e8e5f0'}} />
-                    )}
+                    <div className="w-1.5 h-8 rounded-full flex-shrink-0"
+                      style={{background: hasData ? '#d63683' : '#e8e5f0'}} />
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-navy truncate">{entry.item_name}</p>
                       <p className="text-xs truncate" style={{color: '#7880a4'}}>
@@ -251,39 +239,28 @@ export default function SalesEntry() {
                     </div>
                   </div>
 
-                  {/* Units sold */}
                   <div className="px-2">
-                    <input
-                      type="number"
-                      min="0"
-                      value={entry.units_sold}
+                    <input type="number" min="0" value={entry.units_sold}
                       onChange={e => handleChange(entry.sku_id, 'units_sold', e.target.value)}
                       placeholder="0"
-                      className="w-full px-3 py-2 rounded-xl border text-center text-sm text-navy focus:outline-none focus:ring-2 focus:ring-pink transition-all"
+                      className="w-full px-3 py-2 rounded-xl border text-center text-sm text-navy focus:outline-none transition-all"
                       style={{
                         borderColor: entry.units_sold ? '#d63683' : '#e8e5f0',
                         background: entry.units_sold ? '#fff3ec' : 'white'
-                      }}
-                    />
+                      }} />
                   </div>
 
-                  {/* Units returned */}
                   <div className="px-2">
-                    <input
-                      type="number"
-                      min="0"
-                      value={entry.units_returned}
+                    <input type="number" min="0" value={entry.units_returned}
                       onChange={e => handleChange(entry.sku_id, 'units_returned', e.target.value)}
                       placeholder="0"
-                      className="w-full px-3 py-2 rounded-xl border text-center text-sm text-navy focus:outline-none focus:ring-2 focus:ring-pink transition-all"
+                      className="w-full px-3 py-2 rounded-xl border text-center text-sm text-navy focus:outline-none transition-all"
                       style={{
                         borderColor: entry.units_returned ? '#ffc7a3' : '#e8e5f0',
                         background: entry.units_returned ? '#fff9f5' : 'white'
-                      }}
-                    />
+                      }} />
                   </div>
 
-                  {/* Current stock */}
                   <StockBadge orgId={org?.id} skuId={entry.sku_id} warehouseId={warehouseId} />
                 </div>
               )
@@ -296,12 +273,9 @@ export default function SalesEntry() {
           <p className="text-xs" style={{color: '#b0b4c8'}}>
             Only rows with values entered will be saved. Empty rows are skipped.
           </p>
-          <button
-            onClick={handleSave}
-            disabled={loading}
+          <button onClick={handleSave} disabled={loading}
             className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all"
-            style={{background: saved ? '#0f9b58' : loading ? '#9ca3af' : '#d63683'}}
-          >
+            style={{background: saved ? '#0f9b58' : loading ? '#9ca3af' : '#d63683'}}>
             {saved ? (
               <><CheckCircle size={18} /> Saved!</>
             ) : loading ? (
@@ -311,13 +285,11 @@ export default function SalesEntry() {
             )}
           </button>
         </div>
-
       </div>
     </Layout>
   )
 }
 
-// Shows live current stock for each SKU in the selected warehouse
 function StockBadge({ orgId, skuId, warehouseId }) {
   const [qty, setQty] = useState(null)
 
@@ -335,7 +307,6 @@ function StockBadge({ orgId, skuId, warehouseId }) {
   if (qty === null) return <div className="text-center text-xs" style={{color: '#b0b4c8'}}>—</div>
 
   const color = qty <= 0 ? '#ef4444' : qty < 20 ? '#f97316' : '#0f9b58'
-
   return (
     <div className="text-center">
       <span className="text-sm font-semibold" style={{color}}>{qty}</span>
