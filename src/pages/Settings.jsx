@@ -5,12 +5,14 @@ import CategoriesTab from '../components/settings/CategoriesTab'
 import BrandsTab from '../components/settings/BrandsTab'
 import WarehousesTab from '../components/settings/WarehousesTab'
 import SkusTab from '../components/settings/SkusTab'
+import BulkUploadTab from '../components/settings/BulkUploadTab'
 
 const tabs = [
   { id: 'categories', label: 'Categories' },
-  { id: 'brands', label: 'Brands' },
+  { id: 'brands',     label: 'Brands' },
   { id: 'warehouses', label: 'Warehouses' },
-  { id: 'skus', label: 'SKUs' },
+  { id: 'skus',       label: 'SKUs' },
+  { id: 'bulk',       label: '⬆ Bulk Upload', highlight: true },
 ]
 
 export default function Settings() {
@@ -20,7 +22,8 @@ export default function Settings() {
   if (loading) return (
     <Layout>
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-pink border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
+          style={{borderColor: '#d63683', borderTopColor: 'transparent'}} />
       </div>
     </Layout>
   )
@@ -41,12 +44,16 @@ export default function Settings() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="px-5 py-2 rounded-lg text-sm font-medium transition-all"
+              className="px-5 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
               style={{
-                background: activeTab === tab.id ? '#1e2b71' : 'transparent',
-                color: activeTab === tab.id ? '#fefefd' : '#7880a4',
-              }}
-            >
+                background: activeTab === tab.id
+                  ? tab.highlight ? '#d63683' : '#1e2b71'
+                  : 'transparent',
+                color: activeTab === tab.id
+                  ? '#fefefd'
+                  : tab.highlight ? '#d63683' : '#7880a4',
+                fontWeight: tab.highlight ? '700' : '500',
+              }}>
               {tab.label}
             </button>
           ))}
@@ -56,9 +63,10 @@ export default function Settings() {
         {org && (
           <>
             {activeTab === 'categories' && <CategoriesTab orgId={org.id} />}
-            {activeTab === 'brands' && <BrandsTab orgId={org.id} />}
+            {activeTab === 'brands'     && <BrandsTab orgId={org.id} />}
             {activeTab === 'warehouses' && <WarehousesTab orgId={org.id} />}
-            {activeTab === 'skus' && <SkusTab orgId={org.id} />}
+            {activeTab === 'skus'       && <SkusTab orgId={org.id} />}
+            {activeTab === 'bulk'       && <BulkUploadTab orgId={org.id} />}
           </>
         )}
       </div>
