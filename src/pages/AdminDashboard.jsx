@@ -90,7 +90,7 @@ export default function AdminDashboard() {
     const trialOrgs = subs?.filter(s => s.status === 'trial').length || 0
     const activeOrgs = subs?.filter(s => s.status === 'active').length || 0
     const expiredOrgs = subs?.filter(s => s.status === 'expired').length || 0
-    const mrr = activeOrgs * 4999
+    const mrr = activeOrgs * 9999
 
     setStats({
       totalOrgs: orgs?.length || 0,

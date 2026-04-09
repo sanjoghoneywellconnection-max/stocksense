@@ -16,7 +16,7 @@ export default function Subscribe() {
     const [promoError, setPromoError] = useState('')
     const [showSuccess, setShowSuccess] = useState(false)
 
-    const BASE_PRICE = 4999
+    const BASE_PRICE = 9999
     const finalPrice = promoResult
         ? promoResult.discount_pct === 100
             ? 0

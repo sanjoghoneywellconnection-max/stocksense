@@ -327,7 +327,7 @@ export default function Landing() {
             { value: 19, suffix: '.6/day', label: 'units tracked per SKU' },
             { value: 90, suffix: '+', label: 'days of history analysed' },
             { value: 14, suffix: ' days', label: 'free trial, no card needed' },
-            { value: 4999, suffix: '', label: 'Rs. /month after trial' },
+            { value: 9999, suffix: '', label: 'Rs. /month after trial' },
           ].map(({ value, suffix, label }, i) => (
             <div key={i}>
               <p style={{
