@@ -31,7 +31,7 @@ export default function PaywallBlur({ children }) {
             Your free trial has ended. Subscribe to continue accessing your inventory intelligence.
           </p>
           <div className="rounded-xl p-4 mb-5" style={{background: '#f8f7fc'}}>
-            <p className="text-2xl font-bold text-navy">Rs. 4,999</p>
+            <p className="text-2xl font-bold text-navy">Rs. 9,999</p>
             <p className="text-sm" style={{color: '#7880a4'}}>per month · cancel anytime</p>
           </div>
           <button

@@ -77,7 +77,7 @@ export default function TermsConditions() {
           },
           {
             title: '5. Subscription & Payments',
-            content: `After the free trial, continued access requires a paid subscription at Rs. 4,999 per month.\n\n• Subscriptions are billed monthly from the date of first payment\n• Promo codes may be applied at checkout for discounts on the first month only\n• Payments are processed securely by Razorpay\n• We do not store your card or bank account details on our servers\n• Subscriptions do not auto-renew currently — you must manually renew each month\n• No refunds are provided for partial months`,
+            content: `After the free trial, continued access requires a paid subscription at Rs. 9,999 per month.\n\n• Subscriptions are billed monthly from the date of first payment\n• Promo codes may be applied at checkout for discounts on the first month only\n• Payments are processed securely by Razorpay\n• We do not store your card or bank account details on our servers\n• Subscriptions do not auto-renew currently — you must manually renew each month\n• No refunds are provided for partial months`,
           },
           {
             title: '6. Your Data',

@@ -498,7 +498,7 @@ export default function Landing() {
                 <span style={{
                   fontFamily: 'Sora, sans-serif', fontSize: '3rem',
                   fontWeight: '800', color: 'white', lineHeight: 1,
-                }}>Rs. 4,999</span>
+                }}>Rs. 9,999</span>
                 <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '15px', paddingBottom: '6px' }}>/month</span>
               </div>
               <p style={{ color: BRAND_COLORS.peach, fontSize: '14px', marginTop: '12px' }}>

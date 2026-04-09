@@ -317,7 +317,7 @@ export default function AdminDashboard() {
               icon: <CreditCard size={20} />,
               label: 'MRR',
               value: `Rs. ${(stats.mrr / 1000).toFixed(1)}K`,
-              sub: `${stats.activeSubscriptions} × Rs. 4,999`,
+              sub: `${stats.activeSubscriptions} × Rs. 9,999`,
               color: '#1e2b71', bg: '#f0f1fa',
             },
             {
