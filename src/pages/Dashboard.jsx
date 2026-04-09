@@ -4,7 +4,7 @@ import { useOrg } from '../hooks/useOrg'
 import { supabase } from '../supabaseClient'
 import {
   AlertTriangle, TrendingUp, TrendingDown,
-  RefreshCw, ArrowRight
+  RefreshCw, ArrowRight, IndianRupee
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import TrainingButton from '../components/TrainingButton'
@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [skuHealth, setSkuHealth] = useState({ green: 0, amber: 0, red: 0, black: 0 })
   const [bcgCounts, setBcgCounts] = useState({ star: 0, cash_cow: 0, question_mark: 0, dog: 0 })
   const [topAlerts, setTopAlerts] = useState([])
+  const [atRiskSkus, setAtRiskSkus] = useState([])
   const [todaySales, setTodaySales] = useState({ units: 0, gmv: 0 })
   const [yesterdaySales, setYesterdaySales] = useState({ units: 0, gmv: 0 })
   const [totalSkuCount, setTotalSkuCount] = useState(0)
@@ -29,6 +30,7 @@ export default function Dashboard() {
       fetchSkuHealth(),
       fetchBcgCounts(),
       fetchTopAlerts(),
+      fetchAtRiskRevenue(),
       fetchSalesComparison(),
       fetchTotalSkus(),
     ])
@@ -45,7 +47,9 @@ export default function Dashboard() {
   async function fetchTotalSkus() {
     const { data } = await supabase
       .from('skus').select('id')
-      .eq('org_id', org.id).eq('is_active', true)
+      .eq('org_id', org.id)
+      .eq('is_active', true)
+      .eq('status', 'active')
     setTotalSkuCount(data?.length || 0)
   }
 
@@ -87,8 +91,9 @@ export default function Dashboard() {
     const { data } = await supabase
       .from('sku_metrics')
       .select(`
-        doc_status, doc_days, reorder_deadline, days_to_reorder, sku_id, calculated_on,
-        skus(item_name, variant_name, sku_code)
+        doc_status, doc_days, reorder_deadline, days_to_reorder,
+        sku_id, calculated_on,
+        skus(item_name, variant_name, sku_code, status)
       `)
       .eq('org_id', org.id)
       .in('doc_status', ['red', 'black'])
@@ -98,9 +103,72 @@ export default function Dashboard() {
     const unique = data.filter(m => {
       if (seen.has(m.sku_id)) return false
       seen.add(m.sku_id); return true
-    })
+    }).filter(m => m.skus?.status === 'active')
     unique.sort((a, b) => parseFloat(a.doc_days) - parseFloat(b.doc_days))
     setTopAlerts(unique.slice(0, 5))
+  }
+
+  async function fetchAtRiskRevenue() {
+    // Get all SKU metrics with selling price where DOC < lead time
+    // These are SKUs that WILL stock out before a reorder can arrive
+    const { data } = await supabase
+      .from('sku_metrics')
+      .select(`
+        sku_id, doc_days, drr_30d, calculated_on,
+        skus(
+          item_name, variant_name, sku_code,
+          lead_time_days, selling_price, status
+        )
+      `)
+      .eq('org_id', org.id)
+      .order('calculated_on', { ascending: false })
+
+    if (!data) return
+
+    // Deduplicate
+    const seen = new Set()
+    const unique = data.filter(m => {
+      if (seen.has(m.sku_id)) return false
+      seen.add(m.sku_id); return true
+    })
+
+    // Only active SKUs where DOC is less than lead time
+    // This means they CANNOT reorder in time — revenue is genuinely at risk
+    const atRisk = unique
+      .filter(m => {
+        if (m.skus?.status !== 'active') return false
+        const doc = parseFloat(m.doc_days || 0)
+        const leadTime = parseInt(m.skus?.lead_time_days || 0)
+        return doc < leadTime && doc >= 0
+      })
+      .map(m => {
+        const doc = parseFloat(m.doc_days || 0)
+        const leadTime = parseInt(m.skus?.lead_time_days || 0)
+        const drr = parseFloat(m.drr_30d || 0)
+        const sellingPrice = parseFloat(m.skus?.selling_price || 0)
+
+        // Days they will be out of stock = lead time - current DOC
+        // (the gap between when they run out and when new stock arrives)
+        const daysAtRisk = Math.max(0, leadTime - doc)
+        const revenueAtRisk = Math.round(daysAtRisk * drr * sellingPrice)
+
+        return {
+          sku_id: m.sku_id,
+          item_name: m.skus?.item_name,
+          variant_name: m.skus?.variant_name,
+          sku_code: m.skus?.sku_code,
+          doc,
+          leadTime,
+          drr,
+          sellingPrice,
+          daysAtRisk,
+          revenueAtRisk,
+        }
+      })
+      .filter(m => m.revenueAtRisk > 0)
+      .sort((a, b) => b.revenueAtRisk - a.revenueAtRisk)
+
+    setAtRiskSkus(atRisk)
   }
 
   async function fetchSalesComparison() {
@@ -127,11 +195,19 @@ export default function Dashboard() {
     ? (((todaySales.gmv - yesterdaySales.gmv) / yesterdaySales.gmv) * 100).toFixed(1)
     : null
 
+  const totalRevenueAtRisk = atRiskSkus.reduce((sum, s) => sum + s.revenueAtRisk, 0)
+
   const docStatusConfig = {
     green: { label: 'Healthy',  color: '#0f9b58', bg: '#f0fdf4', border: '#bbf7d0', desc: '30+ days cover' },
     amber: { label: 'Plan Now', color: '#d97706', bg: '#fffbeb', border: '#fde68a', desc: '15–30 days cover' },
     red:   { label: 'Act Now',  color: '#dc2626', bg: '#fef2f2', border: '#fecaca', desc: 'Under 15 days' },
     black: { label: 'Critical', color: '#111827', bg: '#f9fafb', border: '#e5e7eb', desc: 'OOS or < lead time' },
+  }
+
+  function formatCurrency(amount) {
+    if (amount >= 100000) return `Rs. ${(amount / 100000).toFixed(1)}L`
+    if (amount >= 1000) return `Rs. ${(amount / 1000).toFixed(1)}K`
+    return `Rs. ${amount}`
   }
 
   if (loading) return (
@@ -157,7 +233,9 @@ export default function Dashboard() {
               {greeting}, {org?.contact_email?.split('@')[0]} 👋
             </h1>
             <p className="text-sm mt-0.5" style={{color: '#7880a4'}}>
-              {org?.name} · {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              {org?.name} · {new Date().toLocaleDateString('en-IN', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+              })}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -171,8 +249,98 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Urgent banner */}
-        {urgentCount > 0 && (
+        {/* ── REVENUE AT RISK CARD ── */}
+        {atRiskSkus.length > 0 && (
+          <div className="rounded-2xl overflow-hidden border"
+            style={{borderColor: '#fecaca', background: 'linear-gradient(135deg, #7f1d1d, #991b1b)'}}>
+
+            {/* Card header */}
+            <div className="px-6 py-5 flex items-start justify-between flex-wrap gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{background: 'rgba(255,255,255,0.15)'}}>
+                  <IndianRupee size={22} style={{color: 'white'}} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider mb-1"
+                    style={{color: 'rgba(255,255,255,0.6)'}}>
+                    Revenue at Risk — Act Now
+                  </p>
+                  <p className="text-3xl font-bold text-white">
+                    {formatCurrency(totalRevenueAtRisk)}
+                  </p>
+                  <p className="text-sm mt-1" style={{color: 'rgba(255,255,255,0.7)'}}>
+                    {atRiskSkus.length} SKU{atRiskSkus.length > 1 ? 's' : ''} will
+                    stock out before a reorder can arrive.
+                    This is the revenue you will lose if you do not order today.
+                  </p>
+                </div>
+              </div>
+              <button onClick={() => navigate('/reorder')}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex-shrink-0"
+                style={{background: 'white', color: '#991b1b'}}>
+                Fix This Now <ArrowRight size={15} />
+              </button>
+            </div>
+
+            {/* At-risk SKU rows */}
+            <div style={{background: 'rgba(0,0,0,0.2)'}}>
+              {atRiskSkus.slice(0, 4).map((sku, i) => (
+                <div key={sku.sku_id}
+                  className="flex items-center justify-between px-6 py-3.5 border-t"
+                  style={{borderColor: 'rgba(255,255,255,0.08)'}}>
+
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                      style={{background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)'}}>
+                      {i + 1}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white truncate">
+                        {sku.item_name}
+                        {sku.variant_name ? ` · ${sku.variant_name}` : ''}
+                      </p>
+                      <p className="text-xs" style={{color: 'rgba(255,255,255,0.5)'}}>
+                        {sku.sku_code} · {sku.doc.toFixed(0)}d stock left · {sku.leadTime}d lead time
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-6 flex-shrink-0">
+                    {/* Explanation */}
+                    <div className="hidden sm:block text-right">
+                      <p className="text-xs" style={{color: 'rgba(255,255,255,0.5)'}}>
+                        {sku.daysAtRisk}d OOS × {sku.drr.toFixed(1)}/day × Rs.{sku.sellingPrice}
+                      </p>
+                    </div>
+
+                    {/* Revenue at risk */}
+                    <div className="text-right">
+                      <p className="text-base font-bold text-white">
+                        {formatCurrency(sku.revenueAtRisk)}
+                      </p>
+                      <p className="text-xs" style={{color: 'rgba(255,255,255,0.5)'}}>at risk</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {atRiskSkus.length > 4 && (
+                <div className="px-6 py-3 text-center border-t"
+                  style={{borderColor: 'rgba(255,255,255,0.08)'}}>
+                  <button onClick={() => navigate('/reorder')}
+                    className="text-sm font-medium"
+                    style={{color: 'rgba(255,255,255,0.6)'}}>
+                    + {atRiskSkus.length - 4} more SKUs at risk → View Reorder Planner
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Urgent banner — only show if no at-risk card shown */}
+        {urgentCount > 0 && atRiskSkus.length === 0 && (
           <div className="flex items-center justify-between px-5 py-4 rounded-2xl flex-wrap gap-3"
             style={{background: '#fef2f2', border: '1px solid #fecaca'}}>
             <div className="flex items-center gap-3">
@@ -217,19 +385,19 @@ export default function Dashboard() {
 
           <div className="bg-white rounded-2xl border p-5" style={{borderColor: '#e8e5f0'}}>
             <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{color: '#7880a4'}}>
-              Today's GMV
+              Today's Revenue
             </p>
             <p className="text-3xl font-bold text-navy">
-              Rs. {todaySales.gmv > 0 ? (todaySales.gmv / 1000).toFixed(1) + 'K' : '0'}
+              {todaySales.gmv > 0 ? formatCurrency(todaySales.gmv) : 'Rs. 0'}
             </p>
             <p className="text-sm mt-1" style={{color: '#7880a4'}}>
-              Yesterday: Rs. {yesterdaySales.gmv > 0 ? (yesterdaySales.gmv / 1000).toFixed(1) + 'K' : '0'}
+              Yesterday: {yesterdaySales.gmv > 0 ? formatCurrency(yesterdaySales.gmv) : 'Rs. 0'}
             </p>
           </div>
 
           <div className="bg-white rounded-2xl border p-5" style={{borderColor: '#e8e5f0'}}>
             <p className="text-xs font-medium uppercase tracking-wider mb-3" style={{color: '#7880a4'}}>
-              Total SKUs
+              Total Active SKUs
             </p>
             <p className="text-3xl font-bold text-navy">{totalSkuCount}</p>
             <p className="text-sm mt-1" style={{color: '#7880a4'}}>
@@ -326,7 +494,7 @@ export default function Dashboard() {
                 { key: 'star',          label: '🚀 Fast Movers',    desc: 'High sales + growing',    color: '#d63683', bg: '#fff0f7' },
                 { key: 'cash_cow',      label: '💰 Steady Earners', desc: 'High sales + consistent', color: '#0f9b58', bg: '#f0fdf4' },
                 { key: 'question_mark', label: '🌱 Rising SKUs',    desc: 'Low sales + growing',     color: '#d97706', bg: '#fffbeb' },
-                { key: 'dog',           label: '⚠️ Slow Movers',   desc: 'Low sales + declining',   color: '#6b7280', bg: '#f9fafb' },
+                { key: 'dog',           label: '⚠️ Slow Movers',    desc: 'Low sales + declining',   color: '#6b7280', bg: '#f9fafb' },
               ].map(({ key, label, desc, color, bg }) => (
                 <div key={key} className="flex items-center justify-between px-4 py-3 rounded-xl"
                   style={{background: bg}}>
