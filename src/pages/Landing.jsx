@@ -567,6 +567,8 @@ export default function Landing() {
         </div>
       </section>
 
+      // Only the affiliate section parts updated below
+
       {/* ── AFFILIATE SECTION ── */}
       <section id="affiliate" className="affiliate-section" style={{
         background: BRAND_COLORS.navy, padding: '80px 24px',
@@ -591,8 +593,7 @@ export default function Landing() {
               color: 'rgba(255,255,255,0.6)', fontSize: '16px',
               maxWidth: '520px', margin: '0 auto', lineHeight: '1.7',
             }}>
-              Every brand you refer earns you Rs. 2,000 in the first month
-              and Rs. 500 every month they stay active. No cap, no expiry.
+              Earn 20% of every payment your referral makes. Recurring. Lifetime.
             </p>
           </div>
 
@@ -605,28 +606,28 @@ export default function Landing() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {[
                 {
-                  emoji: '🎯',
-                  title: 'First paid month',
-                  amount: 'Rs. 2,000',
-                  desc: 'One-time flat commission when they subscribe',
+                  emoji: '📊',
+                  title: '20% commission',
+                  amount: '20% / month',
+                  desc: 'Of every payment your customer makes',
                 },
                 {
                   emoji: '🔄',
-                  title: 'Every month after',
-                  amount: 'Rs. 500',
-                  desc: 'Recurring as long as they stay active',
+                  title: 'Recurring forever',
+                  amount: 'Every month',
+                  desc: 'As long as the customer stays subscribed',
                 },
                 {
                   emoji: '📈',
-                  title: '10 active users',
-                  amount: 'Rs. 7,000/mo',
-                  desc: 'Passive income every single month',
+                  title: '10 active customers',
+                  amount: 'Rs. 20,000/mo',
+                  desc: 'At full price — passive monthly income',
                 },
                 {
-                  emoji: '🏆',
-                  title: 'No earnings cap',
-                  amount: 'Unlimited',
-                  desc: 'The more you refer, the more you earn',
+                  emoji: '♾️',
+                  title: 'Lifetime commission',
+                  amount: 'No expiry',
+                  desc: 'Even if you leave the program, you keep earning',
                 },
               ].map(({ emoji, title, amount, desc }) => (
                 <div key={title} className="affiliate-earn-card"
@@ -635,17 +636,15 @@ export default function Landing() {
                     padding: '16px 20px', borderRadius: '16px',
                     background: 'rgba(255,255,255,0.07)',
                     border: '1px solid rgba(255,255,255,0.1)',
-                    cursor: 'default',
                   }}>
-                  <span style={{ fontSize: '24px', flexShrink: 0 }}>{emoji}</span>
+                  <span style={{ fontSize: '24px' }}>{emoji}</span>
                   <div style={{ flex: 1 }}>
                     <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>{title}</p>
-                    <p style={{ color: 'white', fontSize: '13px', marginTop: '2px' }}>{desc}</p>
+                    <p style={{ color: 'white', fontSize: '13px' }}>{desc}</p>
                   </div>
                   <p style={{
                     fontFamily: 'Sora, sans-serif', fontWeight: '800',
                     color: BRAND_COLORS.pink, fontSize: '15px',
-                    flexShrink: 0, textAlign: 'right',
                   }}>{amount}</p>
                 </div>
               ))}
@@ -663,9 +662,7 @@ export default function Landing() {
                 background: BRAND_COLORS.pink,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 24px', fontSize: '28px',
-              }}>
-                🤝
-              </div>
+              }}>🤝</div>
 
               <h3 style={{
                 fontFamily: 'Sora, sans-serif', fontSize: '1.4rem',
@@ -677,29 +674,18 @@ export default function Landing() {
                 color: 'rgba(255,255,255,0.55)', fontSize: '14px',
                 lineHeight: '1.7', marginBottom: '32px',
               }}>
-                Apply in 2 minutes. We review within 24 hours.
-                Once approved, you get your unique link and start earning immediately.
+                Apply in 2 minutes. Get your link. Start earning immediately.
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <button onClick={() => navigate('/affiliate/apply')} className="cta-btn"
+                <button className="cta-btn"
                   style={{
                     width: '100%', padding: '14px', borderRadius: '12px',
                     background: BRAND_COLORS.pink, border: 'none',
                     color: 'white', fontSize: '15px', fontWeight: '600',
-                    cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                    cursor: 'pointer',
                   }}>
                   Apply to Join →
-                </button>
-                <button onClick={() => navigate('/affiliate/login')}
-                  style={{
-                    width: '100%', padding: '14px', borderRadius: '12px',
-                    background: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    color: 'rgba(255,255,255,0.7)', fontSize: '15px', fontWeight: '500',
-                    cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                  }}>
-                  Already an affiliate? Login
                 </button>
               </div>
 
@@ -708,16 +694,16 @@ export default function Landing() {
                 marginTop: '24px',
               }}>
                 {[
-                  { value: 'Rs. 2K', label: 'First month' },
-                  { value: 'Rs. 500', label: 'Per month' },
-                  { value: '∞', label: 'No cap' },
+                  { value: '20%', label: 'Commission rate' },
+                  { value: 'Monthly', label: 'Paid out' },
+                  { value: '∞', label: 'Lifetime' },
                 ].map(({ value, label }) => (
                   <div key={label} style={{ textAlign: 'center' }}>
                     <p style={{
                       fontFamily: 'Sora, sans-serif', fontWeight: '800',
                       color: 'white', fontSize: '16px',
                     }}>{value}</p>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '2px' }}>{label}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>{label}</p>
                   </div>
                 ))}
               </div>
@@ -725,7 +711,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Blog preview */}
       <section style={{ background: 'white', padding: '80px 24px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>

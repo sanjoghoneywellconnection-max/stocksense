@@ -104,16 +104,49 @@ export default function AffiliateApply() {
           </Link>
           <h1 className="text-3xl font-bold text-navy mb-3">Join as Affiliate Partner</h1>
           <p style={{color: '#7880a4'}}>
-            Earn Rs. 2,000 for every brand you refer + Rs. 500/month as long as they stay active.
+            Earn 20% of every payment your referred customers make — every month, for life.
           </p>
         </div>
 
-        {/* Commission cards */}
+        {/* Commission explanation */}
+        <div className="rounded-2xl border p-6 mb-8" style={{background: '#1e2b71', borderColor: '#2d3e9e'}}>
+          <p className="text-xs font-bold uppercase tracking-wider mb-4"
+            style={{color: 'rgba(255,255,255,0.5)'}}>
+            How you earn
+          </p>
+          <div className="space-y-3">
+            {[
+              { pays: 'Rs. 9,999', earns: 'Rs. 2,000/mo', note: 'Full price — maximum earnings' },
+              { pays: 'Rs. 7,999', earns: 'Rs. 1,600/mo', note: 'You offer 20% discount' },
+              { pays: 'Rs. 5,999', earns: 'Rs. 1,200/mo', note: 'You offer 40% discount' },
+              { pays: 'Rs. 4,999', earns: 'Rs. 1,000/mo', note: 'Floor price — minimum charge' },
+            ].map(({ pays, earns, note }) => (
+              <div key={pays}
+                className="flex items-center justify-between px-4 py-3 rounded-xl"
+                style={{background: 'rgba(255,255,255,0.07)'}}>
+                <div>
+                  <p className="text-sm font-semibold text-white">Customer pays {pays}</p>
+                  <p className="text-xs" style={{color: 'rgba(255,255,255,0.45)'}}>{note}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold" style={{color: '#d63683'}}>You earn</p>
+                  <p className="text-base font-bold text-white">{earns}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 px-4 py-3 rounded-xl text-xs"
+            style={{background: 'rgba(214,54,131,0.15)', color: 'rgba(255,255,255,0.7)'}}>
+            💡 Commission is <strong className="text-white">20% of actual amount paid</strong> — every month — for as long as the customer stays subscribed. Even if you leave the program, commissions on existing customers continue forever.
+          </div>
+        </div>
+
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { emoji: '🎯', label: 'First Month', value: 'Rs. 2,000' },
-            { emoji: '🔄', label: 'Every Month After', value: 'Rs. 500' },
-            { emoji: '📈', label: 'No Earnings Cap', value: 'Unlimited' },
+            { emoji: '📊', label: 'Commission rate', value: '20%' },
+            { emoji: '🔄', label: 'Frequency', value: 'Monthly' },
+            { emoji: '♾️', label: 'Duration', value: 'Lifetime' },
           ].map(({ emoji, label, value }) => (
             <div key={label} className="bg-white rounded-2xl border p-4 text-center"
               style={{borderColor: '#e8e5f0'}}>
