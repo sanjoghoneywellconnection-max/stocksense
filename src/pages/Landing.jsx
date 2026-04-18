@@ -608,7 +608,7 @@ export default function Landing() {
                 {
                   emoji: '📊',
                   title: '20% commission',
-                  amount: '20% / month',
+                  amount: '20% per month',
                   desc: 'Of every payment your customer makes',
                 },
                 {
@@ -678,13 +678,16 @@ export default function Landing() {
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <button className="cta-btn"
+                <button
+                  onClick={() => navigate('/affiliate/apply')}
+                  className="cta-btn"
                   style={{
                     width: '100%', padding: '14px', borderRadius: '12px',
                     background: BRAND_COLORS.pink, border: 'none',
                     color: 'white', fontSize: '15px', fontWeight: '600',
                     cursor: 'pointer',
-                  }}>
+                  }}
+                >
                   Apply to Join →
                 </button>
               </div>
