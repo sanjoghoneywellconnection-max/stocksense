@@ -65,6 +65,7 @@ export default function Login() {
 
     setLoading(true)
 
+    // ── Auth signup ──
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -84,12 +85,17 @@ export default function Login() {
       return
     }
 
+    // ── Capture affiliate ref code ──
+    const refCode = localStorage.getItem('inventsight_ref') || null
+
+    // ── Create organization ──
     const { data: orgData, error: orgError } = await supabase
       .from('organizations')
       .insert({
         name: orgName.trim(),
         contact_email: email,
         created_by: userId,
+        referred_by_code: refCode,
       })
       .select()
       .single()
@@ -100,11 +106,40 @@ export default function Login() {
       return
     }
 
+    // ── Create org member ──
     await supabase.from('org_members').insert({
       org_id: orgData.id,
       user_id: userId,
       role: 'owner',
     })
+
+    // ── Link affiliate referral if ref code present ──
+    if (refCode) {
+      const { data: affiliate } = await supabase
+        .from('affiliates')
+        .select('id')
+        .eq('affiliate_code', refCode.toUpperCase())
+        .eq('status', 'active')
+        .single()
+
+      if (affiliate) {
+        // Create referral record
+        await supabase.from('affiliate_referrals').insert({
+          affiliate_id: affiliate.id,
+          org_id: orgData.id,
+          status: 'trial',
+          commission_earned: 0,
+        })
+
+        // Update org with affiliate ID
+        await supabase
+          .from('organizations')
+          .update({ referred_by_affiliate_id: affiliate.id })
+          .eq('id', orgData.id)
+      }
+
+      localStorage.removeItem('inventsight_ref')
+    }
 
     setSignupSuccess(true)
     setLoading(false)
@@ -302,16 +337,20 @@ export default function Login() {
                     <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2"
                       style={{color: '#b0b4c8'}} />
                     <input type="password"
-                      value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
                       placeholder="Repeat your password" required
                       className="w-full pl-9 pr-4 py-3 rounded-xl border text-sm text-navy focus:outline-none"
                       style={{borderColor: '#e8e5f0'}} />
                   </div>
                 </div>
 
-                {/* Terms & Conditions Checkbox */}
+                {/* Terms checkbox */}
                 <div className="flex items-start gap-3 px-4 py-3 rounded-xl"
-                  style={{background: agreedToTerms ? '#f0fdf4' : '#f8f7fc', border: `1px solid ${agreedToTerms ? '#bbf7d0' : '#e8e5f0'}`}}>
+                  style={{
+                    background: agreedToTerms ? '#f0fdf4' : '#f8f7fc',
+                    border: `1px solid ${agreedToTerms ? '#bbf7d0' : '#e8e5f0'}`
+                  }}>
                   <input
                     type="checkbox"
                     id="terms"
@@ -322,18 +361,17 @@ export default function Login() {
                       accentColor: '#d63683', cursor: 'pointer', flexShrink: 0,
                     }}
                   />
-                  <label htmlFor="terms" className="text-sm cursor-pointer" style={{color: '#374151', lineHeight: '1.6'}}>
+                  <label htmlFor="terms" className="text-sm cursor-pointer"
+                    style={{color: '#374151', lineHeight: '1.6'}}>
                     I have read and agree to the{' '}
-                    <button
-                      type="button"
+                    <button type="button"
                       onClick={() => window.open('/terms', '_blank')}
                       className="font-semibold underline"
                       style={{color: '#d63683'}}>
                       Terms & Conditions
                     </button>
                     {' '}and{' '}
-                    <button
-                      type="button"
+                    <button type="button"
                       onClick={() => window.open('/privacy', '_blank')}
                       className="font-semibold underline"
                       style={{color: '#d63683'}}>
@@ -350,8 +388,10 @@ export default function Login() {
 
                 <button type="submit" disabled={loading}
                   className="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all"
-                  style={{background: loading ? '#9ca3af' : !agreedToTerms ? '#b0b4c8' : '#d63683',
-                    cursor: !agreedToTerms ? 'not-allowed' : 'pointer'}}>
+                  style={{
+                    background: loading ? '#9ca3af' : !agreedToTerms ? '#b0b4c8' : '#d63683',
+                    cursor: !agreedToTerms ? 'not-allowed' : 'pointer'
+                  }}>
                   {loading ? 'Creating account...' : 'Start free trial →'}
                 </button>
               </form>
@@ -437,7 +477,8 @@ export default function Login() {
               <p className="text-xs mb-4" style={{color: '#b0b4c8'}}>
                 Didn't get it? Check your spam folder.
               </p>
-              <button onClick={() => { setMode('login'); setForgotSent(false); setEmail('') }}
+              <button
+                onClick={() => { setMode('login'); setForgotSent(false); setEmail('') }}
                 className="text-sm font-medium" style={{color: '#d63683'}}>
                 ← Back to login
               </button>

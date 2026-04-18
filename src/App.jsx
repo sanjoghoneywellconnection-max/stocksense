@@ -25,6 +25,9 @@ import AdminLogin from './pages/AdminLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
+import AffiliateApply from './pages/AffiliateApply'
+import AffiliateLogin from './pages/AffiliateLogin'
+import AffiliateDashboard from './pages/AffiliateDashboard'
 
 function Spinner() {
   return (
@@ -58,13 +61,31 @@ function OrgRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      {/* Public */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsConditions />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
+
+      {/* Affiliate — public, own auth */}
+      <Route path="/affiliate/apply" element={<AffiliateApply />} />
+      <Route path="/affiliate/login" element={<AffiliateLogin />} />
+      <Route path="/affiliate/dashboard" element={<AffiliateDashboard />} />
+
+      {/* Admin — own auth */}
+      <Route path="/admin-inventsight-2026" element={<AdminLogin />} />
+      <Route path="/admin-inventsight-2026/dashboard" element={<AdminDashboard />} />
+
+      {/* App — requires Supabase auth + org */}
       <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
       <Route path="/dashboard" element={<OrgRoute><Dashboard /></OrgRoute>} />
       <Route path="/subscribe" element={<OrgRoute><Subscribe /></OrgRoute>} />
       <Route path="/settings" element={<OrgRoute><Settings /></OrgRoute>} />
       <Route path="/sales" element={<OrgRoute><SalesEntry /></OrgRoute>} />
+      <Route path="/profile" element={<OrgRoute><Profile /></OrgRoute>} />
       <Route path="/skus" element={<OrgRoute><PaywallBlur><SkuExplorer /></PaywallBlur></OrgRoute>} />
       <Route path="/reorder" element={<OrgRoute><PaywallBlur><ReorderPlanner /></PaywallBlur></OrgRoute>} />
       <Route path="/bcg" element={<OrgRoute><PaywallBlur><PortfolioAnalysis /></PaywallBlur></OrgRoute>} />
@@ -72,15 +93,9 @@ function AppRoutes() {
       <Route path="/returns" element={<OrgRoute><PaywallBlur><ReturnsAnalysis /></PaywallBlur></OrgRoute>} />
       <Route path="/categories" element={<OrgRoute><PaywallBlur><CategoryContribution /></PaywallBlur></OrgRoute>} />
       <Route path="/warehouses-map" element={<OrgRoute><PaywallBlur><WarehouseMap /></PaywallBlur></OrgRoute>} />
+
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/dashboard" />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/profile" element={<OrgRoute><Profile /></OrgRoute>} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/terms" element={<TermsConditions />} />
-      <Route path="/admin-inventsight-2026" element={<AdminLogin />} />
-      <Route path="/admin-inventsight-2026/dashboard" element={<AdminDashboard />} />
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:slug" element={<BlogPost />} />
     </Routes>
   )
 }

@@ -46,6 +46,15 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // ── Capture affiliate ref code from URL ──
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const ref = params.get('ref')
+    if (ref) {
+      localStorage.setItem('inventsight_ref', ref)
+    }
+  }, [])
+
   const features = [
     {
       icon: '📦',
@@ -147,6 +156,12 @@ export default function Landing() {
         .nav-cta-secondary { display: flex !important; }
         .nav-login-mobile { display: none; }
 
+        .affiliate-earn-card:hover {
+          transform: translateY(-2px);
+          background: rgba(255,255,255,0.12) !important;
+        }
+        .affiliate-earn-card { transition: transform 0.2s ease, background 0.2s ease; }
+
         @media (max-width: 768px) {
           .nav-links { display: none !important; }
           .nav-cta-secondary { display: none !important; }
@@ -160,11 +175,13 @@ export default function Landing() {
           .steps-grid { grid-template-columns: 1fr !important; }
           .pricing-header { padding: 24px !important; }
           .pricing-body { padding: 20px 24px !important; }
+          .affiliate-grid { grid-template-columns: 1fr !important; }
           footer { flex-direction: column !important; text-align: center; align-items: center !important; }
           .pain-section { padding: 60px 20px !important; }
           .features-section { padding: 60px 20px !important; }
           .steps-section { padding: 60px 20px !important; }
           .pricing-section { padding: 60px 20px !important; }
+          .affiliate-section { padding: 60px 20px !important; }
           .final-cta { padding: 60px 20px !important; }
           .final-cta h2 { font-size: 1.8rem !important; }
           .section-title { font-size: 1.6rem !important; }
@@ -183,7 +200,6 @@ export default function Landing() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         height: '68px',
       }}>
-        {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '34px', height: '34px', borderRadius: '10px',
@@ -197,12 +213,12 @@ export default function Landing() {
           </span>
         </div>
 
-        {/* Nav right */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div className="nav-links">
             <a href="#features" className="nav-link" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Features</a>
             <a href="#how-it-works" className="nav-link" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>How it works</a>
             <a href="#pricing" className="nav-link" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Pricing</a>
+            <a href="#affiliate" className="nav-link" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '14px', fontWeight: '500' }}>Affiliate</a>
           </div>
           <button onClick={() => navigate('/login')} className="nav-login-mobile"
             style={{
@@ -253,7 +269,6 @@ export default function Landing() {
         }} />
 
         <div style={{ maxWidth: '820px', textAlign: 'center', position: 'relative', zIndex: 1, width: '100%' }}>
-
           <div className="fade-in fade-in-1" style={{
             display: 'inline-flex', alignItems: 'center', gap: '8px',
             background: 'rgba(214,54,131,0.15)', border: '1px solid rgba(214,54,131,0.3)',
@@ -552,6 +567,273 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── AFFILIATE SECTION ── */}
+      <section id="affiliate" className="affiliate-section" style={{
+        background: BRAND_COLORS.navy, padding: '80px 24px',
+      }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+
+          <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+            <p style={{
+              color: BRAND_COLORS.pink, fontSize: '13px', fontWeight: '600',
+              textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px',
+            }}>
+              Affiliate Program
+            </p>
+            <h2 style={{
+              fontFamily: 'Sora, sans-serif', fontSize: '2.2rem', fontWeight: '800',
+              color: 'white', marginBottom: '16px',
+            }}>
+              Know D2C founders?{' '}
+              <span style={{ color: BRAND_COLORS.pink }}>Earn by introducing them.</span>
+            </h2>
+            <p style={{
+              color: 'rgba(255,255,255,0.6)', fontSize: '16px',
+              maxWidth: '520px', margin: '0 auto', lineHeight: '1.7',
+            }}>
+              Every brand you refer earns you Rs. 2,000 in the first month
+              and Rs. 500 every month they stay active. No cap, no expiry.
+            </p>
+          </div>
+
+          <div className="affiliate-grid" style={{
+            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px',
+            alignItems: 'center',
+          }}>
+
+            {/* Left — earning cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {[
+                {
+                  emoji: '🎯',
+                  title: 'First paid month',
+                  amount: 'Rs. 2,000',
+                  desc: 'One-time flat commission when they subscribe',
+                },
+                {
+                  emoji: '🔄',
+                  title: 'Every month after',
+                  amount: 'Rs. 500',
+                  desc: 'Recurring as long as they stay active',
+                },
+                {
+                  emoji: '📈',
+                  title: '10 active users',
+                  amount: 'Rs. 7,000/mo',
+                  desc: 'Passive income every single month',
+                },
+                {
+                  emoji: '🏆',
+                  title: 'No earnings cap',
+                  amount: 'Unlimited',
+                  desc: 'The more you refer, the more you earn',
+                },
+              ].map(({ emoji, title, amount, desc }) => (
+                <div key={title} className="affiliate-earn-card"
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '16px',
+                    padding: '16px 20px', borderRadius: '16px',
+                    background: 'rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    cursor: 'default',
+                  }}>
+                  <span style={{ fontSize: '24px', flexShrink: 0 }}>{emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>{title}</p>
+                    <p style={{ color: 'white', fontSize: '13px', marginTop: '2px' }}>{desc}</p>
+                  </div>
+                  <p style={{
+                    fontFamily: 'Sora, sans-serif', fontWeight: '800',
+                    color: BRAND_COLORS.pink, fontSize: '15px',
+                    flexShrink: 0, textAlign: 'right',
+                  }}>{amount}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Right — CTA card */}
+            <div style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '24px', padding: '40px',
+              textAlign: 'center',
+            }}>
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '20px',
+                background: BRAND_COLORS.pink,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 24px', fontSize: '28px',
+              }}>
+                🤝
+              </div>
+
+              <h3 style={{
+                fontFamily: 'Sora, sans-serif', fontSize: '1.4rem',
+                fontWeight: '800', color: 'white', marginBottom: '12px',
+              }}>
+                Join the Program
+              </h3>
+              <p style={{
+                color: 'rgba(255,255,255,0.55)', fontSize: '14px',
+                lineHeight: '1.7', marginBottom: '32px',
+              }}>
+                Apply in 2 minutes. We review within 24 hours.
+                Once approved, you get your unique link and start earning immediately.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <button onClick={() => navigate('/affiliate/apply')} className="cta-btn"
+                  style={{
+                    width: '100%', padding: '14px', borderRadius: '12px',
+                    background: BRAND_COLORS.pink, border: 'none',
+                    color: 'white', fontSize: '15px', fontWeight: '600',
+                    cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                  }}>
+                  Apply to Join →
+                </button>
+                <button onClick={() => navigate('/affiliate/login')}
+                  style={{
+                    width: '100%', padding: '14px', borderRadius: '12px',
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    color: 'rgba(255,255,255,0.7)', fontSize: '15px', fontWeight: '500',
+                    cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                  }}>
+                  Already an affiliate? Login
+                </button>
+              </div>
+
+              <div style={{
+                display: 'flex', gap: '20px', justifyContent: 'center',
+                marginTop: '24px',
+              }}>
+                {[
+                  { value: 'Rs. 2K', label: 'First month' },
+                  { value: 'Rs. 500', label: 'Per month' },
+                  { value: '∞', label: 'No cap' },
+                ].map(({ value, label }) => (
+                  <div key={label} style={{ textAlign: 'center' }}>
+                    <p style={{
+                      fontFamily: 'Sora, sans-serif', fontWeight: '800',
+                      color: 'white', fontSize: '16px',
+                    }}>{value}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '2px' }}>{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Blog preview */}
+      <section style={{ background: 'white', padding: '80px 24px' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            flexWrap: 'wrap', gap: '16px', marginBottom: '40px',
+          }}>
+            <div>
+              <p style={{
+                color: BRAND_COLORS.pink, fontSize: '13px', fontWeight: '600',
+                textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px',
+              }}>
+                From the blog
+              </p>
+              <h2 style={{
+                fontFamily: 'Sora, sans-serif', fontSize: '1.8rem',
+                fontWeight: '800', color: BRAND_COLORS.navy,
+              }}>
+                Inventory insights for D2C founders
+              </h2>
+            </div>
+            <button onClick={() => navigate('/blog')}
+              style={{
+                background: 'transparent', border: `2px solid ${BRAND_COLORS.navy}`,
+                color: BRAND_COLORS.navy, padding: '10px 24px', borderRadius: '12px',
+                fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+              }}>
+              View all articles →
+            </button>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '24px',
+          }}>
+            {[
+              {
+                emoji: '📦',
+                category: 'Inventory Management',
+                categoryColor: '#7c3aed',
+                title: 'What is Days of Cover — and why every D2C brand needs to track it',
+                readTime: '4 min read',
+                slug: 'what-is-days-of-cover',
+              },
+              {
+                emoji: '🚨',
+                category: 'Amazon & Flipkart',
+                categoryColor: '#d97706',
+                title: 'The hidden cost of going out of stock on Amazon',
+                readTime: '5 min read',
+                slug: 'amazon-flipkart-stockout-cost',
+              },
+              {
+                emoji: '📊',
+                category: 'D2C Brand Growth',
+                categoryColor: '#0891b2',
+                title: 'Why your Excel inventory sheet will eventually break your business',
+                readTime: '6 min read',
+                slug: 'drr-vs-excel',
+              },
+            ].map((post, i) => (
+              <div key={i}
+                onClick={() => navigate(`/blog/${post.slug}`)}
+                style={{
+                  background: '#faf9fd', borderRadius: '20px',
+                  border: '1px solid #ede9f8', overflow: 'hidden',
+                  cursor: 'pointer', transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-4px)'
+                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(30,43,113,0.1)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}>
+                <div style={{
+                  background: 'linear-gradient(135deg, #1e2b71 0%, #2d3e9e 100%)',
+                  padding: '28px', textAlign: 'center', fontSize: '40px',
+                }}>
+                  {post.emoji}
+                </div>
+                <div style={{ padding: '20px' }}>
+                  <span style={{
+                    background: `${post.categoryColor}15`, color: post.categoryColor,
+                    padding: '4px 10px', borderRadius: '100px',
+                    fontSize: '11px', fontWeight: '600',
+                  }}>
+                    {post.category}
+                  </span>
+                  <h3 style={{
+                    fontFamily: 'Sora, sans-serif', fontSize: '15px', fontWeight: '700',
+                    color: BRAND_COLORS.navy, margin: '12px 0 16px', lineHeight: '1.5',
+                  }}>
+                    {post.title}
+                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <p style={{ fontSize: '12px', color: '#7880a4' }}>{post.readTime}</p>
+                    <span style={{ color: BRAND_COLORS.pink, fontSize: '13px', fontWeight: '600' }}>Read →</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="final-cta" style={{
         background: BRAND_COLORS.navy, padding: '80px 24px', textAlign: 'center',
@@ -560,93 +842,6 @@ export default function Landing() {
           fontFamily: 'Sora, sans-serif', fontSize: '2.4rem', fontWeight: '800',
           color: 'white', marginBottom: '16px', maxWidth: '600px', margin: '0 auto 16px',
         }}>
-          {/* Blog preview */}
-          <section style={{ background: 'white', padding: '80px 24px' }}>
-            <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '40px' }}>
-                <div>
-                  <p style={{ color: BRAND_COLORS.pink, fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
-                    From the blog
-                  </p>
-                  <h2 style={{ fontFamily: 'Sora, sans-serif', fontSize: '1.8rem', fontWeight: '800', color: BRAND_COLORS.navy }}>
-                    Inventory insights for D2C founders
-                  </h2>
-                </div>
-                <button onClick={() => navigate('/blog')}
-                  style={{
-                    background: 'transparent', border: `2px solid ${BRAND_COLORS.navy}`,
-                    color: BRAND_COLORS.navy, padding: '10px 24px', borderRadius: '12px',
-                    fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-                  }}>
-                  View all articles →
-                </button>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-                {[
-                  {
-                    emoji: '📦',
-                    category: 'Inventory Management',
-                    categoryColor: '#7c3aed',
-                    title: 'What is Days of Cover — and why every D2C brand needs to track it',
-                    readTime: '4 min read',
-                    slug: 'what-is-days-of-cover',
-                  },
-                  {
-                    emoji: '🚨',
-                    category: 'Amazon & Flipkart',
-                    categoryColor: '#d97706',
-                    title: 'The hidden cost of going out of stock on Amazon',
-                    readTime: '5 min read',
-                    slug: 'amazon-flipkart-stockout-cost',
-                  },
-                  {
-                    emoji: '📊',
-                    category: 'D2C Brand Growth',
-                    categoryColor: '#0891b2',
-                    title: 'Why your Excel inventory sheet will eventually break your business',
-                    readTime: '6 min read',
-                    slug: 'drr-vs-excel',
-                  },
-                ].map((post, i) => (
-                  <div key={i}
-                    onClick={() => navigate(`/blog/${post.slug}`)}
-                    style={{
-                      background: '#faf9fd', borderRadius: '20px',
-                      border: '1px solid #ede9f8', overflow: 'hidden',
-                      cursor: 'pointer', transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 20px 40px rgba(30,43,113,0.1)' }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                    <div style={{
-                      background: 'linear-gradient(135deg, #1e2b71 0%, #2d3e9e 100%)',
-                      padding: '28px', textAlign: 'center', fontSize: '40px',
-                    }}>
-                      {post.emoji}
-                    </div>
-                    <div style={{ padding: '20px' }}>
-                      <span style={{
-                        background: `${post.categoryColor}15`, color: post.categoryColor,
-                        padding: '4px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: '600',
-                      }}>
-                        {post.category}
-                      </span>
-                      <h3 style={{
-                        fontFamily: 'Sora, sans-serif', fontSize: '15px', fontWeight: '700',
-                        color: BRAND_COLORS.navy, margin: '12px 0 16px', lineHeight: '1.5',
-                      }}>
-                        {post.title}
-                      </h3>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <p style={{ fontSize: '12px', color: '#7880a4' }}>{post.readTime}</p>
-                        <span style={{ color: BRAND_COLORS.pink, fontSize: '13px', fontWeight: '600' }}>Read →</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
           Your next stockout is preventable.
         </h2>
         <p style={{
@@ -675,7 +870,6 @@ export default function Landing() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         flexWrap: 'wrap', gap: '16px',
       }}>
-        {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '28px', height: '28px', borderRadius: '8px',
@@ -689,13 +883,11 @@ export default function Landing() {
           </span>
         </div>
 
-        {/* Copyright */}
         <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px', textAlign: 'center' }}>
           © 2026 InventSight · Inventory Intelligence for Indian Brands
         </p>
 
-        {/* Footer links */}
-        <div className="footer-links" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="footer-links" style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
           <button onClick={() => navigate('/privacy')}
             style={{
               background: 'transparent', border: 'none',
@@ -712,14 +904,6 @@ export default function Landing() {
             }}>
             Terms & Conditions
           </button>
-          <button onClick={() => navigate('/login')}
-            style={{
-              background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
-              color: 'rgba(255,255,255,0.6)', padding: '8px 20px', borderRadius: '10px',
-              fontSize: '13px', cursor: 'pointer',
-            }}>
-            Log in →
-          </button>
           <button onClick={() => navigate('/blog')}
             style={{
               background: 'transparent', border: 'none',
@@ -727,6 +911,22 @@ export default function Landing() {
               cursor: 'pointer', textDecoration: 'underline',
             }}>
             Blog
+          </button>
+          <button onClick={() => navigate('/affiliate/apply')}
+            style={{
+              background: 'transparent', border: 'none',
+              color: 'rgba(255,255,255,0.5)', fontSize: '13px',
+              cursor: 'pointer', textDecoration: 'underline',
+            }}>
+            Affiliate Program
+          </button>
+          <button onClick={() => navigate('/login')}
+            style={{
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
+              color: 'rgba(255,255,255,0.6)', padding: '8px 20px', borderRadius: '10px',
+              fontSize: '13px', cursor: 'pointer',
+            }}>
+            Log in →
           </button>
         </div>
       </footer>
